@@ -14,6 +14,7 @@ namespace Evacuation_Planning_and_Monitoring_API.Repositories
         }
         public async Task<Vehicle> AddVehicleAsync(Vehicle vehicle)
         {
+            vehicle.VehicleID = vehicle.VehicleID.ToUpper(); // Ensure VehicleID is in uppercase
             _context.Vehicles.Add(vehicle);
             await _context.SaveChangesAsync();
             return vehicle;
@@ -21,7 +22,7 @@ namespace Evacuation_Planning_and_Monitoring_API.Repositories
 
         public async  Task<Vehicle?> DeleteVehicleAsync(string id)
         {
-            var vehicle = await _context.Vehicles.FirstOrDefaultAsync(v => v.VehicleID == id);
+            var vehicle = await _context.Vehicles.FirstOrDefaultAsync(v => v.VehicleID.ToUpper() == id.ToUpper());
             if (vehicle != null)
             {
                 _context.Vehicles.Remove(vehicle);
@@ -38,12 +39,12 @@ namespace Evacuation_Planning_and_Monitoring_API.Repositories
 
         public async Task<Vehicle?> GetVehiclesByIdAsync(string id)
         {
-            return await _context.Vehicles.FirstOrDefaultAsync(v => v.VehicleID == id);
+            return await _context.Vehicles.FirstOrDefaultAsync(v => v.VehicleID.ToUpper() == id.ToUpper());
         }
 
         public async Task<Vehicle?> UpdateVehicleAsync(Vehicle vehicle)
         {
-            var existingVehicle = await _context.Vehicles.FirstOrDefaultAsync(v => v.VehicleID == vehicle.VehicleID);
+            var existingVehicle = await _context.Vehicles.FirstOrDefaultAsync(v => v.VehicleID.ToUpper() == vehicle.VehicleID.ToUpper());
             if (existingVehicle != null)
             {
                 existingVehicle.Capacity = vehicle.Capacity;

@@ -12,22 +12,24 @@ namespace Evacuation_Planning_and_Monitoring_API.Repositories
         {
             _context = context;
         }
-        public async Task<EvacuationZone> AddEvacuationZoneAsync(EvacuationZone evacuationZone)
+        public async Task<EvacuationZone> AddEvacuationZoneAsync(EvacuationZone zone)
         {
-            await _context.EvacuationZones.AddAsync(evacuationZone);
+            zone.ZoneID = zone.ZoneID.ToUpper(); // Ensure ZoneID is in uppercase
+            _context.EvacuationZones.Add(zone);
             await _context.SaveChangesAsync();
-            return evacuationZone;
+            return zone;
+
 
         }
 
         public async Task<EvacuationZone?> DeleteEvacuationZoneAsync(string id)
         {
-            var evacuationZone = await _context.EvacuationZones.FirstOrDefaultAsync(e => e.ZoneID == id);
-            if (evacuationZone != null)
+            var zone = await _context.EvacuationZones.FirstOrDefaultAsync(e => e.ZoneID.ToUpper() == id.ToUpper());
+            if (zone != null)
             {
-                _context.EvacuationZones.Remove(evacuationZone);
+                _context.EvacuationZones.Remove(zone);
                 await _context.SaveChangesAsync();
-                return evacuationZone;
+                return zone;
             }
             return null;
 
@@ -41,18 +43,18 @@ namespace Evacuation_Planning_and_Monitoring_API.Repositories
 
         public async Task<EvacuationZone?> GetEvacuationZoneByIdAsync(string id)
         {
-            return await _context.EvacuationZones.FirstOrDefaultAsync(e => e.ZoneID == id);
+            return await _context.EvacuationZones.FirstOrDefaultAsync(e => e.ZoneID.ToUpper() == id.ToUpper());
 
         }
 
-        public async Task<EvacuationZone?> UpdateEvacuationZoneAsync(EvacuationZone evacuationZone)
+        public async Task<EvacuationZone?> UpdateEvacuationZoneAsync(EvacuationZone zone)
         {
-            var existingEvacuationZone = await _context.EvacuationZones.FirstOrDefaultAsync(e => e.ZoneID == evacuationZone.ZoneID);
+            var existingEvacuationZone = await _context.EvacuationZones.FirstOrDefaultAsync(e => e.ZoneID.ToUpper() == zone.ZoneID.ToUpper());
             if (existingEvacuationZone != null)
             {
-                existingEvacuationZone.LocationCoordinates = evacuationZone.LocationCoordinates;
-                existingEvacuationZone.NumberOfPeople = evacuationZone.NumberOfPeople;
-                existingEvacuationZone.UrgencyLevel = evacuationZone.UrgencyLevel;
+                existingEvacuationZone.LocationCoordinates = zone.LocationCoordinates;
+                existingEvacuationZone.NumberOfPeople = zone.NumberOfPeople;
+                existingEvacuationZone.UrgencyLevel = zone.UrgencyLevel;
 
                 await _context.SaveChangesAsync();
                 return existingEvacuationZone;

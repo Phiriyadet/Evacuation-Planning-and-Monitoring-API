@@ -1,7 +1,5 @@
 ﻿using Evacuation_Planning_and_Monitoring_API.Interfaces;
 using Evacuation_Planning_and_Monitoring_API.Models;
-using Evacuation_Planning_and_Monitoring_API.Repositories;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Evacuation_Planning_and_Monitoring_API.Controllers
@@ -53,15 +51,15 @@ namespace Evacuation_Planning_and_Monitoring_API.Controllers
 
         // POST api/evacuation-zones
         [HttpPost]
-        public async Task<ActionResult<EvacuationZone>> Create([FromBody] EvacuationZone evacuationZone)
+        public async Task<ActionResult<EvacuationZone>> Create([FromBody] EvacuationZone zone)
         {
-            if (evacuationZone == null)
+            if (zone == null)
             {
                 return BadRequest("EvacuationZone object is null.");
             }
             try
             {
-                var createdEvacuationZone = await _evacuationZoneRepository.AddEvacuationZoneAsync(evacuationZone);
+                var createdEvacuationZone = await _evacuationZoneRepository.AddEvacuationZoneAsync(zone);
                 return CreatedAtAction(nameof(GetByID), new { id = createdEvacuationZone.ZoneID }, createdEvacuationZone);
             }
             catch (Exception ex)
@@ -73,18 +71,18 @@ namespace Evacuation_Planning_and_Monitoring_API.Controllers
 
         // PUT api/evacuation-zones
         [HttpPut]
-        public async Task<ActionResult<EvacuationZone>> Update([FromBody] EvacuationZone evacuationZone)
+        public async Task<ActionResult<EvacuationZone>> Update([FromBody] EvacuationZone zone)
         {
-            if (evacuationZone == null)
+            if (zone == null)
             {
                 return BadRequest("EvacuationZone object is null.");
             }
             try
             {
-                var updatedEvacuationZone = await _evacuationZoneRepository.UpdateEvacuationZoneAsync(evacuationZone);
+                var updatedEvacuationZone = await _evacuationZoneRepository.UpdateEvacuationZoneAsync(zone);
                 if (updatedEvacuationZone == null)
                 {
-                    return NotFound($"EvacuationZone with ID {evacuationZone.ZoneID} not found.");
+                    return NotFound($"EvacuationZone with ID {zone.ZoneID} not found.");
                 }
                 return Ok(updatedEvacuationZone);
             }
