@@ -1,0 +1,63 @@
+[
+  {
+    "vehicleID": "v1",
+    "capacity": 40,
+    "type": "bus",
+    "locationCoordinates": {
+      "latitude": 13.7563,
+      "longitude": 100.5018
+    },
+    "speed": 60
+  },
+  {
+    "vehicleID": "v2",
+    "capacity": 12,
+    "type": "van",
+    "locationCoordinates": {
+      "latitude": 13.7367,
+      "longitude": 100.5231
+    },
+    "speed": 75
+  },
+  {
+    "vehicleID": "v3",
+    "capacity": 20,
+    "type": "boat",
+    "locationCoordinates": {
+      "latitude": 13.7300,
+      "longitude": 100.5100
+    },
+    "speed": 40
+  },
+  {
+    "vehicleID": "v5",
+    "capacity": 60,
+    "type": "truck",
+    "locationCoordinates": {
+      "latitude": 13.7200,
+      "longitude": 100.5000
+    },
+    "speed": 50
+  },
+  {
+    "vehicleID": "v6",
+    "capacity": 5,
+    "type": "jeep",
+    "locationCoordinates": {
+      "latitude": 13.7100,
+      "longitude": 100.4800
+    },
+    "speed": 85
+  },
+  {
+    "vehicleID": "v7",
+    "capacity": 6,
+    "type": "helicopter",
+    "locationCoordinates": {
+      "latitude": 13.8000,
+      "longitude": 100.6000
+    },
+    "speed": 210
+  }
+]
+

@@ -17,7 +17,8 @@ builder.Services.AddDbContext<ApplicationDBContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
 });
 builder.Services.AddScoped<IVehicleRepository, VehicleRepository>();
-//builder.Services.AddScoped<IEvacuationZoneRepository, EvacuationZoneRepository>();
+builder.Services.AddScoped<IEvacuationZoneRepository, EvacuationZoneRepository>();
+builder.Services.AddScoped<IEvacuationRepository, EvacuationRepository>();
 
 var app = builder.Build();
 

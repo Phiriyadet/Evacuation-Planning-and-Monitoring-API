@@ -5,17 +5,6 @@ namespace Evacuation_Planning_and_Monitoring_API.Data
 {
     public class ApplicationDBContext : DbContext
     {
-        //public ApplicationDBContext()
-        //{
-        //}
-        //public ApplicationDBContext(DbContextOptions<ApplicationDBContext> options, string connectionString) : base(options)
-        //{
-        //    // Use the connection string if provided
-        //    if (!string.IsNullOrEmpty(connectionString))
-        //    {
-        //        Database.GetDbConnection().ConnectionString = connectionString;
-        //    }
-        //}
 
         public ApplicationDBContext(DbContextOptions<ApplicationDBContext> options) : base(options)
         {

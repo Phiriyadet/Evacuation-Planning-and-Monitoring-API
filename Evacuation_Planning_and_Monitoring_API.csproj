@@ -19,4 +19,6 @@
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
   </ItemGroup>
 
+  <ProjectExtensions><VisualStudio><UserProperties datatest_4vehicles_1json__JsonSchema="https://download.stackhawk.com/hawk/jsonschema/hawkconfig.json" /></VisualStudio></ProjectExtensions>
+
 </Project>
