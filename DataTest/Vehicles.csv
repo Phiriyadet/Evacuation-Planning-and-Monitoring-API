@@ -1,0 +1,7 @@
+vehicleID,capacity,type,latitude,longitude,speed
+v1,40,bus,13.7563,100.5018,60
+v2,12,van,13.7367,100.5231,75
+v3,20,boat,13.73,100.51,40
+v5,60,truck,13.72,100.5,50
+v6,5,jeep,13.71,100.48,85
+v7,6,helicopter,13.8,100.6,210

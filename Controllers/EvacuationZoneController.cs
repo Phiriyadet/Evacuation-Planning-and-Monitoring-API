@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Evacuation_Planning_and_Monitoring_API.Controllers
 {
-    [Route("api/evcuation-zones")]
+    [Route("api/evacuation-zones")]
     [ApiController]
     public class EvacuationZoneController : ControllerBase
     {
@@ -95,11 +95,11 @@ namespace Evacuation_Planning_and_Monitoring_API.Controllers
 
         // DELETE api/evacuation-zones/z5
         [HttpDelete("{id}")]
-        public ActionResult Delete(string id)
+        public async Task<ActionResult> Delete(string id)
         {
             try
             {
-                var deletedEvacuationZone = _evacuationZoneRepository.DeleteEvacuationZoneAsync(id);
+                var deletedEvacuationZone = await _evacuationZoneRepository.DeleteEvacuationZoneAsync(id);
                 if (deletedEvacuationZone == null)
                 {
                     return NotFound($"EvacuationZone with ID {id} not found.");

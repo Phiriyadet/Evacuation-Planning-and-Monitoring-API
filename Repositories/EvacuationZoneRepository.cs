@@ -18,8 +18,6 @@ namespace Evacuation_Planning_and_Monitoring_API.Repositories
             _context.EvacuationZones.Add(zone);
             await _context.SaveChangesAsync();
             return zone;
-
-
         }
 
         public async Task<EvacuationZone?> DeleteEvacuationZoneAsync(string id)

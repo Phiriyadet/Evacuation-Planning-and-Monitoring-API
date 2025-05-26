@@ -23,6 +23,10 @@ namespace Evacuation_Planning_and_Monitoring_API.Controllers
             try
             {
                 var vehicles = await _vehicleRepository.GetAllVehiclesAsync();
+                if (vehicles == null || !vehicles.Any())
+                {
+                    return NotFound("No vehicles found.");
+                }
                 return Ok(vehicles);
             }
             catch (Exception ex)
@@ -55,12 +59,18 @@ namespace Evacuation_Planning_and_Monitoring_API.Controllers
         [HttpPost]
         public async Task<ActionResult<Vehicle>> Create([FromBody] Vehicle vehicle)
         {
+            if (!ModelState.IsValid) return BadRequest(ModelState);
             if (vehicle == null)
             {
                 return BadRequest("Vehicle object is null.");
             }
             try
             {
+                var existingVehicle = await _vehicleRepository.GetVehiclesByIdAsync(vehicle.VehicleID);
+                if (existingVehicle != null)
+                {
+                    return Conflict($"Vehicle with ID {vehicle.VehicleID} already exists.");
+                }
                 var createdVehicle = await _vehicleRepository.AddVehicleAsync(vehicle);
                 return CreatedAtAction(nameof(GetByID), new { id = createdVehicle.VehicleID }, createdVehicle);
             }
@@ -75,7 +85,8 @@ namespace Evacuation_Planning_and_Monitoring_API.Controllers
         [HttpPut]
         public async Task<ActionResult<Vehicle>> Update([FromBody] Vehicle vehicle)
         {
-            if (vehicle== null)
+            if (!ModelState.IsValid) return BadRequest(ModelState);
+            if (vehicle == null)
             {
                 return BadRequest("Vehicle object is null.");
             }
@@ -97,11 +108,11 @@ namespace Evacuation_Planning_and_Monitoring_API.Controllers
 
         // DELETE api/vehicles/V5
         [HttpDelete("{id}")]
-        public ActionResult Delete(string id)
+        public async Task<ActionResult> Delete(string id)
         {
             try
             {
-                var deletedVehicle = _vehicleRepository.DeleteVehicleAsync(id);
+                var deletedVehicle = await _vehicleRepository.DeleteVehicleAsync(id);
                 if (deletedVehicle == null)
                 {
                     return NotFound($"Vehicle with ID {id} not found.");
