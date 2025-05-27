@@ -1,6 +1,6 @@
 ﻿namespace Evacuation_Planning_and_Monitoring_API.Helpers
 {
-    public static class Calculation
+    public static class CalculationHelper
     {
         public static double CalculateDistance(double lat1, double lon1, double lat2, double lon2)
         {
@@ -21,13 +21,24 @@
             return rad * c;
 
         }
-        public static double CalculateETA(double distance, double speed)
+        public static string CalculateETA(double distance, double speed)
         {
             if (speed <= 0)
             {
                 throw new ArgumentException("Speed must be greater than zero.");
             }
-            return distance / speed; // ETA in hours
+            double time = (distance / speed);// time in hours, 
+            int hours = (int)time;
+            int minutes = (int)Math.Round((time - hours) * 60);
+
+            if (hours > 0)
+            {
+                return $"{hours} hour {minutes} minute";
+            }
+            else
+            {
+                return $"{minutes} minute";
+            }
 
         }
     }

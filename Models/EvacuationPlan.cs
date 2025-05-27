@@ -4,7 +4,7 @@
     {
         public string ZoneID { get; set; } = string.Empty;
         public string VehicleID { get; set; } = string.Empty;
-        public DateTime ETA { get; set; }
+        public string ETA { get; set; } = string.Empty;
         public int NumberOfPeopleEvacuated { get; set; }
     }
 }
