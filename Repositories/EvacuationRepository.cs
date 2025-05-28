@@ -1,6 +1,7 @@
 ﻿using Evacuation_Planning_and_Monitoring_API.Data;
 using Evacuation_Planning_and_Monitoring_API.Helpers;
 using Evacuation_Planning_and_Monitoring_API.Interfaces;
+using Evacuation_Planning_and_Monitoring_API.Models;
 
 namespace Evacuation_Planning_and_Monitoring_API.Repositories
 {
@@ -20,46 +21,45 @@ namespace Evacuation_Planning_and_Monitoring_API.Repositories
         {
             var zones = await _zoneRepository.GetAllEvacuationZonesAsync();
             var vehicles = await _vehicleRepository.GetAllVehiclesAsync();
-            var sortedZones = zones.OrderByDescending(z => z.UrgencyLevel).ToList(); //เรียงลำดับโซนตามระดับความเร่งด่วนมากไปน้อย
-            var sortedVehicles = vehicles.OrderBy(v => v.Capacity).ToList(); //เรียงลำดับรถตามความจุจากน้อยไปมาก
-
-            //ส่งรถไปยังโซนที่มีความเร่งด่วนสูงสุดก่อน และใช้รถที่มีความจุน้อยที่สุดก่อน
+            var sortedZones = zones.OrderByDescending(z => z.UrgencyLevel).ToList(); //เรียงลำดับโซนตามระดับความเร่งด่วนมากไปน้อย  
+            
+            //ส่งรถไปยังโซนที่มีความเร่งด่วนสูงสุดก่อน และใช้รถที่มีความจุน้อยที่สุดก่อน  
             foreach (var zone in sortedZones)
             {
-                
-                    Console.WriteLine($"Planning evacuation for zone {zone.ZoneID} with urgency level {zone.UrgencyLevel}");
-                    int remainingPeople = zone.NumberOfPeople;
-                foreach (var v in sortedVehicles)
+                var availableVehicles = new List<Vehicle>(vehicles);
+                Console.WriteLine($"Planning evacuation for zone {zone.ZoneID} with urgency level {zone.UrgencyLevel} and {zone.NumberOfPeople} people.");
+                int remainingPeople = zone.NumberOfPeople;
+                 //เรียงลำดับรถตามความจุจากน้อยไปมากที่สามารถรับคนได้ในโซนนี้
+                while (remainingPeople > 0)
                 {
-                    if (remainingPeople <= 0)
+                   
+                    var v = availableVehicles.Where(v => v.Capacity <= remainingPeople).OrderByDescending(v => v.Capacity).FirstOrDefault();
+                    if (v == null)
                     {
-                        Console.WriteLine($"All people evacuated from zone {zone.ZoneID}");
-                        break;
+                        v = availableVehicles.Where(v => v.Capacity > remainingPeople).OrderBy(v => v.Capacity).FirstOrDefault(); //ใช้รถที่มีความจุมากที่สุดหากไม่มีรถที่สามารถรับคนได้ในโซนนี้
+                        if (v == null)
+                        {
+                            Console.WriteLine($"No available vehicles for zone {zone.ZoneID}. Remaining people: {remainingPeople}");
+                            break; //ไม่มีรถว่างให้ใช้
+                        }
                     }
-                    if (v.Capacity <= remainingPeople) // ตรวจสอบว่ารถมีความจุเพียงพอสำหรับคนที่เหลืออยู่ในโซนหรือไม่
-                    {
-                        Console.WriteLine($"Assigning vehicle {v.VehicleID} with capacity {v.Capacity} to zone {zone.ZoneID}");
+                    availableVehicles.Remove(v); //ลบรถที่ถูกใช้ไปแล้วออกจากรายการรถที่ว่างอยู่
+                    
+                    
 
+                    Console.WriteLine($"Assigning vehicle {v.VehicleID} with capacity {v.Capacity} to zone {zone.ZoneID}");
+                        int canTake = Math.Min(v.Capacity, remainingPeople); // จำนวนคนที่รถสามารถรับได้  
                         var distance = CalculationHelper.CalculateDistance(
                             zone.LocationCoordinates.Latitude, zone.LocationCoordinates.Longitude, v.LocationCoordinates.Latitude, v.LocationCoordinates.Longitude);
                         var eta = CalculationHelper.CalculateETA(distance, v.Speed);
 
-                        remainingPeople -= v.Capacity;
-                        if (remainingPeople < 0)
-                        {
-                            remainingPeople = 0; // Ensure we don't go below zero
-                        }
-                        Console.WriteLine($"Vehicle {v.VehicleID} will take {eta} " +
-                            $"to evacuate people from zone {zone.ZoneID}. Remaining people: {remainingPeople}");
-                    }
+                        remainingPeople -= canTake; // ลดจำนวนคนที่เหลืออยู่ในโซน
+                        Console.WriteLine($"Vehicle {v.VehicleID} can take {canTake} people. Remaining people in zone {zone.ZoneID}: {remainingPeople}. ETA: {eta}");
 
-
+                    
                 }
             }
-
-            }
-
-        
+        }
 
         public Task EvacuationClearAsync()
         {
