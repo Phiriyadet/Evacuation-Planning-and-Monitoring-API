@@ -32,7 +32,8 @@ namespace Evacuation_Planning_and_Monitoring_API.Repositories
                  //เรียงลำดับรถตามความจุจากน้อยไปมากที่สามารถรับคนได้ในโซนนี้
                 while (remainingPeople > 0)
                 {
-                   
+
+                    //หารถที่มีความจุที่สามารถรับคนได้ในโซนนี้
                     var v = availableVehicles.Where(v => v.Capacity <= remainingPeople).OrderByDescending(v => v.Capacity).FirstOrDefault();
                     if (v == null)
                     {
@@ -55,8 +56,12 @@ namespace Evacuation_Planning_and_Monitoring_API.Repositories
 
                         remainingPeople -= canTake; // ลดจำนวนคนที่เหลืออยู่ในโซน
                         Console.WriteLine($"Vehicle {v.VehicleID} can take {canTake} people. Remaining people in zone {zone.ZoneID}: {remainingPeople}. ETA: {eta}");
+                    if (remainingPeople <= 0)
+                    {
+                        Console.WriteLine($"All people in zone {zone.ZoneID} have been assigned to vehicles.");
+                       
+                    }
 
-                    
                 }
             }
         }
