@@ -1,6 +1,7 @@
 ﻿using Evacuation_Planning_and_Monitoring_API.Interfaces;
 using Evacuation_Planning_and_Monitoring_API.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Caching.Distributed;
 
 namespace Evacuation_Planning_and_Monitoring_API.Controllers
 {
@@ -9,9 +10,11 @@ namespace Evacuation_Planning_and_Monitoring_API.Controllers
     public class EvacuationController : Controller
     {
         private readonly IEvacuationRepository _evacuationRepository;
+       
         public EvacuationController(IEvacuationRepository evacuationRepository)
         {
             _evacuationRepository = evacuationRepository;
+           
         }
 
         //POST: /api/evacuations/plan

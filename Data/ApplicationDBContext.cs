@@ -12,6 +12,8 @@ namespace Evacuation_Planning_and_Monitoring_API.Data
 
         public DbSet<EvacuationZone> EvacuationZones { get; set; }
         public DbSet<Vehicle> Vehicles { get; set; }
+        public DbSet<EvacuationPlan> EvacuationPlans { get; set; }
+        public DbSet<EvacuationStatus> EvacuationStatuses { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
