@@ -1,5 +1,6 @@
 ﻿using Evacuation_Planning_and_Monitoring_API.Models;
 using Microsoft.EntityFrameworkCore;
+using System.Reflection.Emit;
 
 namespace Evacuation_Planning_and_Monitoring_API.Data
 {
@@ -39,6 +40,18 @@ namespace Evacuation_Planning_and_Monitoring_API.Data
                     loc.Property(l => l.Longitude);
                 });
             });
+
+            // กำหนดให้ ZoneID ใน EvacuationPlan เป็น Foreign Key
+            builder.Entity<EvacuationPlan>()
+                .HasOne<EvacuationZone>()
+                .WithMany()
+                .HasForeignKey(p => p.ZoneID);
+
+            // กำหนดให้ VehicleID ใน EvacuationPlan เป็น Foreign Key
+            builder.Entity<EvacuationPlan>()
+                .HasOne<Vehicle>()
+                .WithMany()
+                .HasForeignKey(p => p.VehicleID);
 
 
 

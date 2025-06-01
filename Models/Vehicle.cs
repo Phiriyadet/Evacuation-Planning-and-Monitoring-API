@@ -1,8 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Security.Cryptography.Xml;
-using System.Xml;
-using static System.Runtime.InteropServices.JavaScript.JSType;
+
 
 namespace Evacuation_Planning_and_Monitoring_API.Models
 {

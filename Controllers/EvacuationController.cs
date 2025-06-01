@@ -23,8 +23,8 @@ namespace Evacuation_Planning_and_Monitoring_API.Controllers
         {
             try
             {
-                await _evacuationRepository.EvacationPlanAsync();
-                return Ok("Evacuation plan created successfully.");
+                var result = await _evacuationRepository.EvacationPlanAsync();
+                return Ok(result);
             }
             catch (Exception ex)
             {
@@ -32,12 +32,48 @@ namespace Evacuation_Planning_and_Monitoring_API.Controllers
             }
         }
 
-        ////GET: /api/evacuations/status
-        //[HttpGet("status")]
-        ////PUT: /api/evacuations/update
-        //[HttpPut("update")]
-        ////DELETE: /api/evacuations/clear
-        //[HttpDelete("clear")]
+        //GET: /api/evacuations/status
+        [HttpGet("status")]
+        public async Task<ActionResult<IEnumerable<EvacuationStatus>>> GetStatus()
+        {
+            try
+            {
+                var status = await _evacuationRepository.EvacuationStatusAsync();
+                return Ok(status);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+        //PUT: /api/evacuations/update
+        [HttpPut("update")]
+        public async Task<ActionResult<IEnumerable<EvacuationStatus>>> UpdateStatus()
+        {
+            try
+            {
+                var updatedStatus = await _evacuationRepository.EvacuationUpdateAsync();
+                return Ok(updatedStatus);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+        //DELETE: /api/evacuations/clear
+        [HttpDelete("clear")]
+        public async Task<ActionResult> ClearEvacuations()
+        {
+            try
+            {
+                await _evacuationRepository.EvacuationClearAsync();
+                return Ok("Evacuation data cleared successfully.");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
 
     }
 }

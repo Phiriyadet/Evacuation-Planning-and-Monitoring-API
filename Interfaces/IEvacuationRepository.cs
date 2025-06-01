@@ -4,9 +4,9 @@ namespace Evacuation_Planning_and_Monitoring_API.Interfaces
 {
     public interface IEvacuationRepository
     {
-        Task EvacationPlanAsync();
-        Task EvacuationStatusAsync();
-        Task EvacuationUpdateAsync();
+        Task<IEnumerable<EvacuationPlan>> EvacationPlanAsync();
+        Task<IEnumerable<EvacuationStatus>> EvacuationStatusAsync();
+        Task<IEnumerable<EvacuationStatus>> EvacuationUpdateAsync();
         Task EvacuationClearAsync();
     }
 }
