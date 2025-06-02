@@ -17,7 +17,7 @@ namespace Evacuation_Planning_and_Monitoring_API.Repositories
         private readonly IVehicleRepository _vehicleRepository;
         private readonly ILogger<EvacuationRepository> _logger;
         private readonly IDistributedCache _cache;
-        private const string cacheKey = "EvacuationStatus";
+        private const string cacheKey = "Evacuation:Status:";
         public EvacuationRepository(ApplicationDBContext context, IEvacuationZoneRepository zoneRepository, IVehicleRepository vehicleRepository, ILogger<EvacuationRepository> logger, IDistributedCache cache)
         {
             _context = context;
@@ -34,14 +34,33 @@ namespace Evacuation_Planning_and_Monitoring_API.Repositories
             var sortedZones = zones.OrderByDescending(z => z.UrgencyLevel).ToList(); //เรียงลำดับโซนตามระดับความเร่งด่วนมากไปน้อย  
             var evacuationPlans = new List<EvacuationPlan>();
             var availableVehicles = new List<Vehicle>(vehicles);
+            var cacheStatusList = new List<EvacuationStatus>();
+            int remainingPeople = 0;
 
+           
             //ส่งรถไปยังโซนที่มีความเร่งด่วนสูงสุดก่อน และใช้รถที่มีความจุน้อยที่สุดก่อน  
             foreach (var zone in sortedZones)
             {
-
+                string zoneCacheKey = $"{cacheKey}{zone.ZoneID}";
                 Console.WriteLine($"Planning evacuation for zone {zone.ZoneID} with urgency level {zone.UrgencyLevel} and {zone.NumberOfPeople} people.");
-                int remainingPeople = zone.NumberOfPeople;
-                //เรียงลำดับรถตามความจุจากน้อยไปมากที่สามารถรับคนได้ในโซนนี้
+               var statusJson = await _cache.GetStringAsync(zoneCacheKey);
+                if (!string.IsNullOrEmpty(statusJson))
+                {
+                    var cachedStatus = JsonSerializer.Deserialize<EvacuationStatus>(statusJson);
+                    if (cachedStatus != null)
+                    {
+                        remainingPeople = cachedStatus.RemainingPeople;
+                        Console.WriteLine($"Retrieved cached evacuation status for zone {zone.ZoneID}. Remaining people: {remainingPeople}");
+                    }
+                }
+                else
+                {
+                    remainingPeople = zone.NumberOfPeople; //ใช้จำนวนคนที่เหลืออยู่ในโซน
+                    Console.WriteLine($"No cached status found for zone {zone.ZoneID}. Using initial number of people: {remainingPeople}");
+                }
+
+                
+
 
                 //หารถที่มีความจุที่สามารถรับคนได้ในโซนนี้
                 var v = availableVehicles.Where(v => v.Capacity <= remainingPeople).OrderByDescending(v => v.Capacity).FirstOrDefault();
@@ -101,24 +120,41 @@ namespace Evacuation_Planning_and_Monitoring_API.Repositories
 
         public async Task<IEnumerable<EvacuationStatus>> EvacuationStatusAsync()
         {
-            var cachedStatus = await _cache.GetStringAsync(cacheKey);
-            if (!string.IsNullOrEmpty(cachedStatus))
+            var zones = await _zoneRepository.GetAllEvacuationZonesAsync();
+            var evacuationStatusList = new List<EvacuationStatus>();
+            foreach (var zone in zones)
             {
-                Console.WriteLine("Returning cached evacuation status.");
-                return JsonSerializer.Deserialize<IEnumerable<EvacuationStatus>>(cachedStatus) ?? new List<EvacuationStatus>();
-            }
-            else
-            {
-                var evaStatus = await _context.EvacuationStatuses.ToListAsync();
-                var status = JsonSerializer.Serialize(evaStatus);
+                string zoneCacheKey = $"{cacheKey}{zone.ZoneID}";
+                var cachedStatusJson = await _cache.GetStringAsync(zoneCacheKey);
+                if (!string.IsNullOrEmpty(cachedStatusJson))
+                {
+                    var status = JsonSerializer.Deserialize<EvacuationStatus>(cachedStatusJson);
+                    if (status != null)
+                    {
+                        evacuationStatusList.Add(status);
+                        Console.WriteLine($"Retrieved cached evacuation status for zone {zone.ZoneID}.");
+                    }
+                }
+                else
+                {
+                    var evaStatus = await _context.EvacuationStatuses.FindAsync(zone.ZoneID);
+                    if (evaStatus != null)
+                    {
+                        var statusJson = JsonSerializer.Serialize(evaStatus);
 
-                await _cache.SetStringAsync(cacheKey, status);
-                return evaStatus;
-
-            }
-
-
+                        await _cache.SetStringAsync(zoneCacheKey, statusJson);
+                        evacuationStatusList.Add(evaStatus);
+                        Console.WriteLine($"No cached status found for zone {zone.ZoneID}. Fetched from database and cached it.");
+                    }
+                    else
+                    {
+                        Console.WriteLine($"No evacuation status found for zone {zone.ZoneID} in the database.");
+                    }
+                }
+            }return evacuationStatusList; // ส่งคืนสถานะการอพยพที่ถูกสร้างขึ้น
         }
+
+        
 
         public async Task<IEnumerable<EvacuationStatus>> EvacuationUpdateAsync()
         {
@@ -147,19 +183,23 @@ namespace Evacuation_Planning_and_Monitoring_API.Repositories
                         LastVehicleIDUsed = lastVehicleID
 
                     };
+                    string zoneCacheKey = $"{cacheKey}{zone.ZoneID}";
+                    var status = JsonSerializer.Serialize(evacuationStatus);
+
+                    await _cache.SetStringAsync(zoneCacheKey, status);
+
+                 
                     evacuationStatusList.Add(evacuationStatus);
+
 
                 }
                 else
                 {
                     Console.WriteLine($"No evacuation plans for zone {zone.ZoneID}.");
                 }
-
+                
 
             }
-            var status = JsonSerializer.Serialize(evacuationStatusList);
-
-            await _cache.SetStringAsync(cacheKey, status);
             return evacuationStatusList; // ส่งคืนสถานะการอพยพที่ถูกสร้างขึ้น
 
         }
