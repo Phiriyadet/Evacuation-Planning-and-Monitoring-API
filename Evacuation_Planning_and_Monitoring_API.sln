@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.14.36109.1 d17.14
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Evacuation_Planning_and_Monitoring_API", "Evacuation_Planning_and_Monitoring_API.csproj", "{91E1386C-3832-4A14-B38E-8B2C307CF6BA}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Evacuation_Planning_and_Monitoring_API", "Evacuation_Planning_and_Monitoring_API\Evacuation_Planning_and_Monitoring_API.csproj", "{91E1386C-3832-4A14-B38E-8B2C307CF6BA}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
