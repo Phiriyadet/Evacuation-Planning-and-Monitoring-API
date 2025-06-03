@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 
 
 namespace Evacuation_Planning_and_Monitoring_API.Models
@@ -22,6 +23,8 @@ namespace Evacuation_Planning_and_Monitoring_API.Models
 
         [Range(0, int.MaxValue, ErrorMessage = "Speed must be a non-negative integer.")]
         public int Speed { get; set; }  // km/h.
+        [JsonIgnore]
+        public bool IsAvailable { get; set; } = true; // Indicates if the vehicle is available for evacuation.
 
     }
 }
