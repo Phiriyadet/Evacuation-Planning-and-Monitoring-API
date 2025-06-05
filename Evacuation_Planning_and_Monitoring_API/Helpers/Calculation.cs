@@ -33,11 +33,15 @@
 
             if (hours > 0)
             {
-                return $"{hours} hour {minutes} minute";
+                return $"{hours} hours {minutes} minutes";
+            }
+            if (minutes > 0)
+            {
+                return $"{minutes} minutes";
             }
             else
             {
-                return $"{minutes} minute";
+                return "less than one minute";
             }
 
         }

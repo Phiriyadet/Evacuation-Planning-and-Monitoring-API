@@ -3,7 +3,7 @@
     public interface IRedisRepository
     {
         Task SetEvacuationStatusCache(string zoneId, string status);
-        Task<string> GetEvacuationStatusCache(string zoneId);
+        Task<string?> GetEvacuationStatusCache(string zoneId);
         Task ClearEvacuationStatusCache(string zoneId);
     }
 }

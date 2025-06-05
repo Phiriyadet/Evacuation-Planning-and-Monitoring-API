@@ -23,6 +23,7 @@ builder.Services.AddStackExchangeRedisCache(options =>
 builder.Services.AddScoped<IVehicleRepository, VehicleRepository>();
 builder.Services.AddScoped<IEvacuationZoneRepository, EvacuationZoneRepository>();
 builder.Services.AddScoped<IEvacuationRepository, EvacuationRepository>();
+builder.Services.AddScoped<IRedisRepository, RedisRepository>();
 
 var app = builder.Build();
 
