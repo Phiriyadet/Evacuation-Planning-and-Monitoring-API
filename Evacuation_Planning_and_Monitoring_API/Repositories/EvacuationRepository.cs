@@ -17,7 +17,7 @@ namespace Evacuation_Planning_and_Monitoring_API.Repositories
         private readonly IVehicleRepository _vehicleRepository;
         private readonly ILogger<EvacuationRepository> _logger;
         private readonly IRedisRepository _cache;
-       
+
         public EvacuationRepository(ApplicationDBContext context, IEvacuationZoneRepository zoneRepository, IVehicleRepository vehicleRepository, ILogger<EvacuationRepository> logger, IRedisRepository cache)
         {
             _context = context;
@@ -40,45 +40,37 @@ namespace Evacuation_Planning_and_Monitoring_API.Repositories
             {
                 int remainingPeople = 0;
 
-                Console.WriteLine($"Planning evacuation for zone {zone.ZoneID} with urgency level {zone.UrgencyLevel} and {zone.NumberOfPeople} people.");
                 _logger.LogInformation($"Planning evacuation for zone {zone.ZoneID} with urgency level {zone.UrgencyLevel} and {zone.NumberOfPeople} people.");
                 remainingPeople = await GetRemainingPeopleFromCacheOrZone(zone); //ดึงจำนวนคนที่เหลืออยู่ในโซนจากแคชหรือฐานข้อมูล
 
                 while (remainingPeople > 0 && vehiclesList.Count > 0)
                 {
-                    Console.WriteLine($"Remaining people in zone {zone.ZoneID}: {remainingPeople}");
                     _logger.LogInformation($"Remaining people in zone {zone.ZoneID}: {remainingPeople}");
-                    //หารถที่ว่างอยู่ในโซนนี้
-                   
 
                     //หารถที่มีความจุที่สามารถรับคนได้ในโซนนี้
                     var vSuit = FindSuitableVehicle(zone, remainingPeople, vehiclesList);
                     if (vSuit == null)
                     {
-                        Console.WriteLine($"No suitable vehicle found for zone {zone.ZoneID} with remaining people {remainingPeople}.");
-                        _logger.LogWarning($"No suitable vehicle found for zone {zone.ZoneID} with remaining people {remainingPeople}.");
-                        break; 
+                        _logger.LogWarning($"No suitable vehicle found for zone {zone.ZoneID} with remaining people {remainingPeople}. Skipping this zone.");
+                        break;
                     }
-
 
                     vSuit.IsAvailable = false; // ทำเครื่องหมายว่ารถถูกใช้งานแล้ว
                     await _vehicleRepository.UpdateVehicleAsync(vSuit); // อัพเดทรถในฐานข้อมูล
                     vehiclesList.Remove(vSuit); //ลบรถที่ถูกใช้ไปแล้วออกจากรายการรถที่ว่างอยู่
+                    _logger.LogInformation($"Vehicle {vSuit.VehicleID} is assigned to zone {zone.ZoneID} with capacity {vSuit.Capacity}.");
 
-                    Console.WriteLine($"Assigning vehicle {vSuit.VehicleID} with capacity {vSuit.Capacity} to zone {zone.ZoneID}");
                     int canTake = Math.Min(vSuit.Capacity, remainingPeople); // จำนวนคนที่รถสามารถรับได้  
                     var evacuationPlan = CreateEvacuationPlan(zone, vSuit, canTake); // สร้างแผนการอพยพสำหรับโซนนี้และรถที่เลือก
 
                     remainingPeople -= canTake; // ลดจำนวนคนที่เหลืออยู่ในโซน
+                    _logger.LogInformation($"Vehicle {vSuit.VehicleID} will evacuate {canTake} people from zone {zone.ZoneID}. Remaining people: {remainingPeople}.");
 
                     if (remainingPeople <= 0)
                     {
-                        Console.WriteLine($"All people in zone {zone.ZoneID} have been assigned to vehicles.");
                         _logger.LogInformation($"All people in zone {zone.ZoneID} have been assigned to vehicles.");
 
                     }
-
-                    Console.WriteLine($"Vehicle {vSuit.VehicleID} will evacuate {canTake} people from zone {zone.ZoneID} in {evacuationPlan.ETA}. Remaining people: {remainingPeople}");
 
                     evacuationPlans.Add(evacuationPlan); //เพิ่มแผนการอพยพลงในรายการแผนการอพยพ
                 }
@@ -90,7 +82,7 @@ namespace Evacuation_Planning_and_Monitoring_API.Repositories
         private async Task<int> GetRemainingPeopleFromCacheOrZone(EvacuationZone zone)
         {
             int remainingPeople = 0;
-            
+
             var statusJson = await _cache.GetEvacuationStatusCache(zone.ZoneID);
             if (!string.IsNullOrEmpty(statusJson))
             {
@@ -98,15 +90,12 @@ namespace Evacuation_Planning_and_Monitoring_API.Repositories
                 if (cachedStatus != null)
                 {
                     remainingPeople = cachedStatus.RemainingPeople;
-
-                    Console.WriteLine($"Retrieved cached evacuation status for zone {zone.ZoneID}. Remaining people: {remainingPeople}");
                     _logger.LogInformation($"Retrieved cached evacuation status for zone {zone.ZoneID}. Remaining people: {remainingPeople}");
                 }
             }
             else
             {
                 remainingPeople = zone.NumberOfPeople; //ใช้จำนวนคนที่เหลืออยู่ในโซน
-                Console.WriteLine($"No cached status found for zone {zone.ZoneID}. Using initial number of people: {remainingPeople}");
                 _logger.LogInformation($"No cached status found for zone {zone.ZoneID}. Using initial number of people: {remainingPeople}");
             }
             return remainingPeople;
@@ -129,7 +118,6 @@ namespace Evacuation_Planning_and_Monitoring_API.Repositories
         {
             double maxDistance = 10.0; // กำหนดระยะทางสูงสุดที่รถสามารถเดินทางได้ (กิโลเมตร) 
             // ค้นหารถที่มีความจุที่สามารถรับคนได้ในโซนนี้
-            Console.WriteLine($"Finding suitable vehicle for zone {zone.ZoneID} with remaining people {remainingPeople}.");
             _logger.LogInformation($"Finding suitable vehicle for zone {zone.ZoneID} with remaining people {remainingPeople}.");
             // ค้นหารถที่ว่างและอยู่ในระยะทางที่กำหนด เรียงตามระยะใกล้
             var candidateVehicles = vehicles
@@ -141,7 +129,7 @@ namespace Evacuation_Planning_and_Monitoring_API.Repositories
                  zone.LocationCoordinates.Latitude, zone.LocationCoordinates.Longitude,
                  v.LocationCoordinates.Latitude, v.LocationCoordinates.Longitude)
          })
-         .Where(v => v.Distance <= maxDistance)
+         //.Where(v => v.Distance <= maxDistance)
          .OrderBy(v => v.Distance)
          .ToList();
 
@@ -158,11 +146,8 @@ namespace Evacuation_Planning_and_Monitoring_API.Repositories
          .ThenByDescending(v => v.Vehicle.Capacity)
          .FirstOrDefault();
             if (suitableVehicle == null)
-            {
-                Console.WriteLine($"No suitable vehicle found for zone {zone.ZoneID} with remaining people {remainingPeople}.");
-                _logger.LogWarning($"No suitable vehicle found for zone {zone.ZoneID} with remaining people {remainingPeople}.");
                 return null; // หากไม่พบรถที่เหมาะสม ให้ส่งคืน null
-            }
+
 
             return suitableVehicle.Vehicle;
         }
@@ -175,25 +160,20 @@ namespace Evacuation_Planning_and_Monitoring_API.Repositories
 
             foreach (var zoneID in zoneIDs)
             {
-               
                 await _cache.ClearEvacuationStatusCache(zoneID); // ลบแคชสำหรับโซนนี้
-                Console.WriteLine($"Removed cache for zone {zoneID}.");
                 _logger.LogInformation($"Removed cache for zone {zoneID}.");
             }
             foreach (var vehicle in vehiles)
             {
                 vehicle.IsAvailable = true; // ทำเครื่องหมายว่ารถทุกคันกลับมาใช้งานได้อีกครั้ง
                 await _vehicleRepository.UpdateVehicleAsync(vehicle); // อัพเดทรถในฐานข้อมูล
-                Console.WriteLine($"Vehicle {vehicle.VehicleID} is now available again.");
                 _logger.LogInformation($"Vehicle {vehicle.VehicleID} is now available again.");
             }
 
             var deleteP = await _context.EvacuationPlans.ExecuteDeleteAsync(); // Clear all evacuation plans from the database
             var deleteS = await _context.EvacuationStatuses.ExecuteDeleteAsync(); // Clear all evacuation statuses from the database
             await _context.SaveChangesAsync();
-            Console.WriteLine($"Cleared evacuation plans and statuses. Deleted {deleteP} plans and {deleteS} statuses from the database.");
             _logger.LogInformation($"Cleared evacuation plans and statuses. Deleted {deleteP} plans and {deleteS} statuses from the database.");
-            return;
 
         }
 
@@ -203,7 +183,7 @@ namespace Evacuation_Planning_and_Monitoring_API.Repositories
             var evacuationStatusList = new List<EvacuationStatus>();
             foreach (var zone in zones)
             {
-               
+
                 var cachedStatusJson = await _cache.GetEvacuationStatusCache(zone.ZoneID);
                 if (!string.IsNullOrEmpty(cachedStatusJson))
                 {
@@ -211,7 +191,6 @@ namespace Evacuation_Planning_and_Monitoring_API.Repositories
                     if (status != null)
                     {
                         evacuationStatusList.Add(status);
-                        Console.WriteLine($"Retrieved cached evacuation status for zone {zone.ZoneID}.");
                         _logger.LogInformation($"Retrieved cached evacuation status for zone {zone.ZoneID}.");
                     }
                 }
@@ -224,19 +203,16 @@ namespace Evacuation_Planning_and_Monitoring_API.Repositories
 
                         await _cache.SetEvacuationStatusCache(zone.ZoneID, statusJson); // เก็บสถานะการอพยพลงในแคช
                         evacuationStatusList.Add(evaStatus);
-                        Console.WriteLine($"No cached status found for zone {zone.ZoneID}. Fetched from database and cached it.");
                         _logger.LogInformation($"No cached status found for zone {zone.ZoneID}. Fetched from database and cached it.");
                     }
                     else
                     {
-                        Console.WriteLine($"No evacuation status found for zone {zone.ZoneID} in the database.");
                         _logger.LogWarning($"No evacuation status found for zone {zone.ZoneID} in the database.");
                     }
                 }
             }
             return evacuationStatusList; // ส่งคืนสถานะการอพยพที่ถูกสร้างขึ้น
         }
-
 
 
         public async Task<IEnumerable<EvacuationStatus>> EvacuationUpdateAsync()
@@ -251,7 +227,6 @@ namespace Evacuation_Planning_and_Monitoring_API.Repositories
                 var zonePlans = evacuationPlans.Where(ep => ep.ZoneID == zone.ZoneID).ToList();
                 if (zonePlans.Any())
                 {
-                    Console.WriteLine($"Updating evacuation status for zone {zone.ZoneID} with {zonePlans.Count} plans.");
                     _logger.LogInformation($"Updating evacuation status for zone {zone.ZoneID} with {zonePlans.Count} plans.");
 
                     int totalPeopleEvacuated = zonePlans.Sum(ep => ep.NumberOfPeople);
@@ -267,7 +242,7 @@ namespace Evacuation_Planning_and_Monitoring_API.Repositories
                         LastVehicleIDUsed = lastVehicleID
 
                     };
-                   
+
                     var status = JsonSerializer.Serialize(evacuationStatus);
 
                     await _cache.SetEvacuationStatusCache(zone.ZoneID, status); // เก็บสถานะการอพยพลงในแคช
@@ -277,7 +252,7 @@ namespace Evacuation_Planning_and_Monitoring_API.Repositories
                 }
                 else
                 {
-                    Console.WriteLine($"No evacuation plans for zone {zone.ZoneID}.");
+                    _logger.LogWarning($"No evacuation plans found for zone {zone.ZoneID}. Skipping status update.");
                 }
 
             }
