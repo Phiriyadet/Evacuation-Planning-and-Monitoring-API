@@ -30,6 +30,16 @@
     "speed": 40
   },
   {
+    "vehicleID": "v4",
+    "capacity": 10,
+    "type": "minivan",
+    "locationCoordinates": {
+      "latitude": 13.6347,
+      "longitude": 100.5231
+    },
+    "speed": 60
+  },
+  {
     "vehicleID": "v5",
     "capacity": 60,
     "type": "truck",
@@ -58,6 +68,55 @@
       "longitude": 100.6000
     },
     "speed": 210
+  },
+  {
+    "vehicleID": "v8",
+    "capacity": 2,
+    "type": "motorcycle",
+    "locationCoordinates": {
+      "latitude": 13.7750,
+      "longitude": 100.5300
+    },
+    "speed": 90
+  },
+  {
+    "vehicleID": "v9",
+    "capacity": 100,
+    "type": "train",
+    "locationCoordinates": {
+      "latitude": 13.7200,
+      "longitude": 100.6100
+    },
+    "speed": 80
+  },
+  {
+    "vehicleID": "v10",
+    "capacity": 150,
+    "type": "ferry",
+    "locationCoordinates": {
+      "latitude": 13.6000,
+      "longitude": 100.4000
+    },
+    "speed": 30
+  },
+  {
+    "vehicleID": "v11",
+    "capacity": 4,
+    "type": "drone",
+    "locationCoordinates": {
+      "latitude": 13.7800,
+      "longitude": 100.5900
+    },
+    "speed": 120
+  },
+  {
+    "vehicleID": "v12",
+    "capacity": 8,
+    "type": "pickup",
+    "locationCoordinates": {
+      "latitude": 13.7100,
+      "longitude": 100.5100
+    },
+    "speed": 70
   }
 ]
-

@@ -88,5 +88,59 @@
     },
     "numberOfPeople": 110,
     "urgencyLevel": 5
+  },
+  {
+    "zoneID": "Z11",
+    "locationCoordinates": {
+      "latitude": 6.5244,
+      "longitude": 101.2816
+    },
+    "numberOfPeople": 70,
+    "urgencyLevel": 2
+  },
+  {
+    "zoneID": "Z12",
+    "locationCoordinates": {
+      "latitude": 17.4140,
+      "longitude": 104.7784
+    },
+    "numberOfPeople": 40,
+    "urgencyLevel": 1
+  },
+  {
+    "zoneID": "Z13",
+    "locationCoordinates": {
+      "latitude": 20.4170,
+      "longitude": 103.1763
+    },
+    "numberOfPeople": 90,
+    "urgencyLevel": 3
+  },
+  {
+    "zoneID": "Z14",
+    "locationCoordinates": {
+      "latitude": 11.5621,
+      "longitude": 104.8885
+    },
+    "numberOfPeople": 300,
+    "urgencyLevel": 5
+  },
+  {
+    "zoneID": "Z15",
+    "locationCoordinates": {
+      "latitude": 10.7769,
+      "longitude": 106.7009
+    },
+    "numberOfPeople": 160,
+    "urgencyLevel": 4
+  },
+  {
+    "zoneID": "Z16",
+    "locationCoordinates": {
+      "latitude": 19.9072,
+      "longitude": 102.1350
+    },
+    "numberOfPeople": 85,
+    "urgencyLevel": 2
   }
 ]

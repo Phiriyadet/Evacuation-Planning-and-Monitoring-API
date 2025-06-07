@@ -21,6 +21,10 @@ namespace Evacuation_Planning_and_Monitoring_API.Controllers
             try
             {
                 var evacuationZones = await _evacuationZoneRepository.GetAllEvacuationZonesAsync();
+                if (evacuationZones == null || !evacuationZones.Any())
+                {
+                    return NotFound("No evacuation zones found.");
+                }
                 return Ok(evacuationZones);
             }
             catch (Exception ex)
