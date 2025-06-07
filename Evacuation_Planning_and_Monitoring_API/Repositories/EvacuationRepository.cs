@@ -27,13 +27,14 @@ namespace Evacuation_Planning_and_Monitoring_API.Repositories
             _cache = cache;
         }
 
-        public async Task<IEnumerable<EvacuationPlan>> EvacationPlanAsync()
+        public async Task<IEnumerable<EvacuationPlan>> EvacationPlanAsync(double distanceKm)
         {
             var zones = await _zoneRepository.GetAllEvacuationZonesAsync();
             var vehicles = await _vehicleRepository.GetAllVehiclesAsync();
             var sortedZones = zones.OrderByDescending(z => z.UrgencyLevel).ThenByDescending(z => z.NumberOfPeople).ToList(); //เรียงลำดับโซนตามระดับความเร่งด่วนมากไปน้อย  
             var evacuationPlans = new List<EvacuationPlan>();
             var vehiclesList = new List<Vehicle>(vehicles);
+            
 
             //ส่งรถไปยังโซนที่มีความเร่งด่วนสูงสุดก่อน และใช้รถที่มีความจุน้อยที่สุดก่อน  
             foreach (var zone in sortedZones)
@@ -48,7 +49,7 @@ namespace Evacuation_Planning_and_Monitoring_API.Repositories
                     _logger.LogInformation($"Remaining people in zone {zone.ZoneID}: {remainingPeople}");
 
                     //หารถที่มีความจุที่สามารถรับคนได้ในโซนนี้
-                    var vSuit = FindSuitableVehicle(zone, remainingPeople, vehiclesList);
+                    var vSuit = FindSuitableVehicle(zone, remainingPeople, vehiclesList, distanceKm);
                     if (vSuit == null)
                     {
                         _logger.LogWarning($"No suitable vehicle found for zone {zone.ZoneID} with remaining people {remainingPeople}. Skipping this zone.");
@@ -114,9 +115,9 @@ namespace Evacuation_Planning_and_Monitoring_API.Repositories
                 ETA = eta
             };
         }
-        private Vehicle? FindSuitableVehicle(EvacuationZone zone, int remainingPeople, List<Vehicle> vehicles)
+        private Vehicle? FindSuitableVehicle(EvacuationZone zone, int remainingPeople, List<Vehicle> vehicles, double distanceKm)
         {
-            double maxDistance = 10.0; // กำหนดระยะทางสูงสุดที่รถสามารถเดินทางได้ (กิโลเมตร) 
+            double maxDistance = distanceKm; // กำหนดระยะทางสูงสุดที่รถสามารถเดินทางได้ (กิโลเมตร) 
             // ค้นหารถที่มีความจุที่สามารถรับคนได้ในโซนนี้
             _logger.LogInformation($"Finding suitable vehicle for zone {zone.ZoneID} with remaining people {remainingPeople}.");
             // ค้นหารถที่ว่างและอยู่ในระยะทางที่กำหนด เรียงตามระยะใกล้
@@ -129,7 +130,7 @@ namespace Evacuation_Planning_and_Monitoring_API.Repositories
                  zone.LocationCoordinates.Latitude, zone.LocationCoordinates.Longitude,
                  v.LocationCoordinates.Latitude, v.LocationCoordinates.Longitude)
          })
-         //.Where(v => v.Distance <= maxDistance)
+         .Where(v => v.Distance <= maxDistance)
          .OrderBy(v => v.Distance)
          .ToList();
 
