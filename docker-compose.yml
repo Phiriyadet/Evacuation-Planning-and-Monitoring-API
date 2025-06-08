@@ -7,27 +7,32 @@ services:
     build:
       context: Evacuation_Planning_and_Monitoring_API
       dockerfile: Dockerfile
-    depends_on:
-      - docker_sqlserver
-      - docker_redis
-
-  docker_sqlserver:
-    image: mcr.microsoft.com/mssql/server:2019-latest
+    ports:
+    - 8080:80
+    - 8081:81
     environment:
-      - ACCEPT_EULA=Y
-      - SA_PASSWORD=EPMDP@ssw0rd123
-    ports:
-      - "1434:1433"
-    volumes:
-      - sqlserver_data:/var/opt/mssql
-  docker_redis:
-    image: redis:latest
-    ports:
-      - "6379:6379"
-    volumes:
-      - redis_data:/data
-volumes:
-  sqlserver_data:
-    driver: local
-  redis_data:
-    driver: local
+    - VaultUri=https://evacuationplanningkey.vault.azure.net/
+#     depends_on:
+#       - docker_sqlserver
+#       - docker_redis
+
+#   docker_sqlserver:
+#     image: mcr.microsoft.com/mssql/server:2019-latest
+#     environment:
+#       - ACCEPT_EULA=Y
+#       - SA_PASSWORD=EPMDP@ssw0rd123
+#     ports:
+#       - "1434:1433"
+#     volumes:
+#       - sqlserver_data:/var/opt/mssql
+#   docker_redis:
+#     image: redis:latest
+#     ports:
+#       - "6379:6379"
+#     volumes:
+#       - redis_data:/data
+# volumes:
+#   sqlserver_data:
+#     driver: local
+#   redis_data:
+#     driver: local
