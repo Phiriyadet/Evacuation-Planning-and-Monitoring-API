@@ -8,10 +8,10 @@ services:
       context: Evacuation_Planning_and_Monitoring_API
       dockerfile: Dockerfile
     ports:
-    - 8080:80
-    - 8081:81
+      - "8080:80"
+      - "8081:81"
     environment:
-    - VaultUri=https://evacuationplanningkey.vault.azure.net/
+      - VaultUri=https://evacuationplanningkey.vault.azure.net/
 #     depends_on:
 #       - docker_sqlserver
 #       - docker_redis
