@@ -23,16 +23,15 @@ jobs:
       uses: docker/login-action@v2
       with:
         registry: https://epmazure.azurecr.io/
-        username: ${{ secrets.AzureAppService_ContainerUsername_b4a71ee8d22041679c3d7d2d69d8e534 }}
-        password: ${{ secrets.AzureAppService_ContainerPassword_8a9d329ed0c1498fbe9c93f3328ca9b7 }}
+        username: ${{ secrets.AzureAppService_ContainerUsername_b4cd7a4c030347eb8217e0d2368cb073 }}
+        password: ${{ secrets.AzureAppService_ContainerPassword_3c3bc130cfca4304a832e2c13769c1c3 }}
 
     - name: Build and push container image to registry
       uses: docker/build-push-action@v3
       with:
         push: true
-        tags: epmazure.azurecr.io/${{ secrets.AzureAppService_ContainerUsername_b4a71ee8d22041679c3d7d2d69d8e534 }}/evacuation-planning-and-monitoring-api:${{ github.sha }}
-        file: ./Evacuation_Planning_and_Monitoring_API/Dockerfile
-        context: ./Evacuation_Planning_and_Monitoring_API
+        tags: epmazure.azurecr.io/${{ secrets.AzureAppService_ContainerUsername_b4cd7a4c030347eb8217e0d2368cb073 }}/evacuation-planning-and-monitoring-api:${{ github.sha }}
+        file: ./Dockerfile
 
   deploy:
     runs-on: ubuntu-latest
@@ -48,5 +47,5 @@ jobs:
       with:
         app-name: 'evacuation-planning-and-monitoring-api'
         slot-name: 'production'
-        publish-profile: ${{ secrets.AzureAppService_PublishProfile_720f6ab4fba94622ab271344eaf0e042 }}
-        images: 'epmazure.azurecr.io/${{ secrets.AzureAppService_ContainerUsername_b4a71ee8d22041679c3d7d2d69d8e534 }}/evacuation-planning-and-monitoring-api:${{ github.sha }}'
+        publish-profile: ${{ secrets.AzureAppService_PublishProfile_a1bbab56a3f4485c91103d46bab23127 }}
+        images: 'epmazure.azurecr.io/${{ secrets.AzureAppService_ContainerUsername_b4cd7a4c030347eb8217e0d2368cb073 }}/evacuation-planning-and-monitoring-api:${{ github.sha }}'
