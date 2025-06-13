@@ -1,6 +1,6 @@
 services:
   evacuation_planning_and_monitoring_api:
-    image: ${DOCKER_REGISTRY-}evacuationplanningandmonitoringapi
+    image: ${DOCKER_REGISTRY-}evacuation-planning-and-monitoring-api
     build:
       context: Evacuation_Planning_and_Monitoring_API
       dockerfile: Dockerfile

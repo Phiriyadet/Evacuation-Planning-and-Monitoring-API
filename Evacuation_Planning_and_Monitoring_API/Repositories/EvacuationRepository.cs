@@ -119,7 +119,7 @@ namespace Evacuation_Planning_and_Monitoring_API.Repositories
         {
             double maxDistance = distanceKm; // กำหนดระยะทางสูงสุดที่รถสามารถเดินทางได้ (กิโลเมตร) 
             // ค้นหารถที่มีความจุที่สามารถรับคนได้ในโซนนี้
-            _logger.LogInformation($"Finding suitable vehicle for zone {zone.ZoneID} with remaining people {remainingPeople}.");
+            _logger.LogInformation($"Finding suitable vehicle for zone {zone.ZoneID} with remaining people {remainingPeople} and max distance {maxDistance} km.");
             // ค้นหารถที่ว่างและอยู่ในระยะทางที่กำหนด เรียงตามระยะใกล้
             var candidateVehicles = vehicles
          .Where(v => v.IsAvailable)

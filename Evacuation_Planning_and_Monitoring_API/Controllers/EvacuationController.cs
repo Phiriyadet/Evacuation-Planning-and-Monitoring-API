@@ -19,11 +19,11 @@ namespace Evacuation_Planning_and_Monitoring_API.Controllers
 
         //POST: /api/evacuations/plan
         [HttpPost("plan")]
-        public async Task<ActionResult<EvacuationPlan>> Plan([FromQuery] double distanceKm=10.0)
+        public async Task<ActionResult<EvacuationPlan>> Plan([FromQuery] double distanceKM=10.0)
         {
             try
             {
-                var result = await _evacuationRepository.EvacationPlanAsync(distanceKm);
+                var result = await _evacuationRepository.EvacationPlanAsync(distanceKM);
                 if (result == null || !result.Any())
                 {
                     return NotFound("No evacuation plans found for the specified distance.");
@@ -61,6 +61,10 @@ namespace Evacuation_Planning_and_Monitoring_API.Controllers
             try
             {
                 var updatedStatus = await _evacuationRepository.EvacuationUpdateAsync();
+                if (updatedStatus == null || !updatedStatus.Any())
+                {
+                    return NotFound("No evacuation plan for update status found.");
+                }
                 return Ok(updatedStatus);
             }
             catch (Exception ex)

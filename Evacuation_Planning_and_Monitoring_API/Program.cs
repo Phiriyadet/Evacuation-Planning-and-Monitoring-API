@@ -13,7 +13,8 @@ builder.Configuration.AddAzureKeyVault(keyVaultEndpoint, new DefaultAzureCredent
 
 //var sqlConnectionString = builder.Configuration.GetConnectionString("DatabaseConnection");
 var sqlConnectionString = builder.Configuration["DatabaseConnection"] ?? throw new InvalidOperationException("DatabaseConnection is not set in the configuration.");
-Console.WriteLine($"SQL Connection String: {sqlConnectionString}");
+
+//Console.WriteLine($"SQL Connection String: {sqlConnectionString}");
 builder.Services.AddDbContext<ApplicationDBContext>(options =>
 {
     //options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
@@ -21,7 +22,7 @@ builder.Services.AddDbContext<ApplicationDBContext>(options =>
 });
 //var redisConn = builder.Configuration.GetConnectionString("CacheRedisConnection");
 var redisConn = builder.Configuration["CacheRedisConnection"] ?? throw new InvalidOperationException("CacheRedisConnection is not set in the configuration.");
-Console.WriteLine($"Redis Connection String: {redisConn}");
+//Console.WriteLine($"Redis Connection String: {redisConn}");
 builder.Services.AddStackExchangeRedisCache(options =>
 {
     options.Configuration = redisConn;
