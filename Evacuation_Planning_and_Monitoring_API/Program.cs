@@ -8,11 +8,11 @@ using Azure.Identity;
 
 var builder = WebApplication.CreateBuilder(args);
 
-var keyVaultEndpoint = new Uri(Environment.GetEnvironmentVariable("VaultUri")!);
-builder.Configuration.AddAzureKeyVault(keyVaultEndpoint, new DefaultAzureCredential());
+//var keyVaultEndpoint = new Uri(Environment.GetEnvironmentVariable("VaultUri")!);
+//builder.Configuration.AddAzureKeyVault(keyVaultEndpoint, new DefaultAzureCredential());
 
-//var sqlConnectionString = builder.Configuration.GetConnectionString("DatabaseConnection");
-var sqlConnectionString = builder.Configuration["DatabaseConnection"] ?? throw new InvalidOperationException("DatabaseConnection is not set in the configuration.");
+var sqlConnectionString = builder.Configuration.GetConnectionString("DatabaseConnection");
+//var sqlConnectionString = builder.Configuration["DatabaseConnection"] ?? throw new InvalidOperationException("DatabaseConnection is not set in the configuration.");
 
 //Console.WriteLine($"SQL Connection String: {sqlConnectionString}");
 builder.Services.AddDbContext<ApplicationDBContext>(options =>
@@ -20,8 +20,8 @@ builder.Services.AddDbContext<ApplicationDBContext>(options =>
     //options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
     options.UseSqlServer(sqlConnectionString);
 });
-//var redisConn = builder.Configuration.GetConnectionString("CacheRedisConnection");
-var redisConn = builder.Configuration["CacheRedisConnection"] ?? throw new InvalidOperationException("CacheRedisConnection is not set in the configuration.");
+var redisConn = builder.Configuration.GetConnectionString("CacheRedisConnection");
+//var redisConn = builder.Configuration["CacheRedisConnection"] ?? throw new InvalidOperationException("CacheRedisConnection is not set in the configuration.");
 //Console.WriteLine($"Redis Connection String: {redisConn}");
 builder.Services.AddStackExchangeRedisCache(options =>
 {
