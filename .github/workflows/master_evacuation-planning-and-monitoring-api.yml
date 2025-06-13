@@ -31,7 +31,8 @@ jobs:
       with:
         push: true
         tags: epmazureregistry.azurecr.io/${{ secrets.AzureAppService_ContainerUsername_7a5ac75601a347e788856af3359edb3f }}/evacuation-planning-and-monitoring-api:${{ github.sha }}
-        file: ./Dockerfile
+        context: ./Evacuation_Planning_and_Monitoring_API
+        file: ./Evacuation_Planning_and_Monitoring_API/Dockerfile
 
   deploy:
     runs-on: ubuntu-latest
