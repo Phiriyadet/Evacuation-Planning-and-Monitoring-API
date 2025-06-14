@@ -61,6 +61,7 @@ namespace Evacuation_Planning_and_Monitoring_API.Controllers
             {
                 return BadRequest("EvacuationZone object is null.");
             }
+            if (!ModelState.IsValid) return BadRequest(ModelState);
             try
             {
                 var createdEvacuationZone = await _evacuationZoneRepository.AddEvacuationZoneAsync(zone);
@@ -81,6 +82,7 @@ namespace Evacuation_Planning_and_Monitoring_API.Controllers
             {
                 return BadRequest("EvacuationZone object is null.");
             }
+            if (!ModelState.IsValid) return BadRequest(ModelState);
             try
             {
                 var updatedEvacuationZone = await _evacuationZoneRepository.UpdateEvacuationZoneAsync(zone);

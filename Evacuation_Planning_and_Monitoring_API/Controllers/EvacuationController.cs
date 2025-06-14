@@ -19,7 +19,7 @@ namespace Evacuation_Planning_and_Monitoring_API.Controllers
 
         //POST: /api/evacuations/plan
         [HttpPost("plan")]
-        public async Task<ActionResult<EvacuationPlan>> Plan([FromQuery] double distanceKM=10.0)
+        public async Task<ActionResult<EvacuationPlan>> Plan([FromQuery] double distanceKM=100.0)
         {
             try
             {
