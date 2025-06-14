@@ -35,6 +35,7 @@ namespace Evacuation_Planning_and_Monitoring_API.Repositories
             var evacuationPlans = new List<EvacuationPlan>();
             var vehiclesList = new List<Vehicle>(vehicles);
             
+            await _cache.ClearEvacuationPlansCache(); // ลบแคชสำหรับแผนการอพยพก่อนเริ่มใหม่
 
             //ส่งรถไปยังโซนที่มีความเร่งด่วนสูงสุดก่อน และใช้รถที่มีความจุน้อยที่สุดก่อน  
             foreach (var zone in sortedZones)
@@ -76,6 +77,8 @@ namespace Evacuation_Planning_and_Monitoring_API.Repositories
                     evacuationPlans.Add(evacuationPlan); //เพิ่มแผนการอพยพลงในรายการแผนการอพยพ
                 }
             }
+
+            await _cache.SetEvacuationPlansCache(JsonSerializer.Serialize(evacuationPlans)); // เก็บแผนการอพยพลงในแคช
             await _context.EvacuationPlans.AddRangeAsync(evacuationPlans);
             await _context.SaveChangesAsync(); // บันทึกแผนการอพยพลงฐานข้อมูล
             return evacuationPlans; // ส่งคืนแผนการอพยพที่ถูกสร้างขึ้น
@@ -171,6 +174,8 @@ namespace Evacuation_Planning_and_Monitoring_API.Repositories
                 _logger.LogInformation($"Vehicle {vehicle.VehicleID} is now available again.");
             }
 
+            await _cache.ClearEvacuationPlansCache(); // ลบแคชสำหรับแผนการอพยพทั้งหมด
+
             var deleteP = await _context.EvacuationPlans.ExecuteDeleteAsync(); // Clear all evacuation plans from the database
             var deleteS = await _context.EvacuationStatuses.ExecuteDeleteAsync(); // Clear all evacuation statuses from the database
             await _context.SaveChangesAsync();
@@ -218,11 +223,27 @@ namespace Evacuation_Planning_and_Monitoring_API.Repositories
 
         public async Task<IEnumerable<EvacuationStatus>> EvacuationUpdateAsync()
         {
-            var evacuationPlans = await _context.EvacuationPlans.ToListAsync();
+            var evacuationPlans = new List<EvacuationPlan>();
+            var evacuationPlansJson = await _cache.GetEvacuationPlansCache();
+            if (string.IsNullOrEmpty(evacuationPlansJson))
+            {
+               _logger.LogInformation("No evacuation plans found in cache. Fetching from database...");
+                evacuationPlans = await _context.EvacuationPlans.ToListAsync();
+            }
+            else 
+            {
+                evacuationPlans = JsonSerializer.Deserialize<List<EvacuationPlan>>(evacuationPlansJson) ?? new List<EvacuationPlan>();
+                _logger.LogInformation($"Retrieved {evacuationPlans.Count} evacuation plans from cache.");
+
+            }
+            
             var zones = await _zoneRepository.GetAllEvacuationZonesAsync();
             var vehicles = await _vehicleRepository.GetAllVehiclesAsync();
+            
+          
 
             var evacuationStatusList = new List<EvacuationStatus>();
+
             foreach (var zone in zones)
             {
                 var zonePlans = evacuationPlans.Where(ep => ep.ZoneID == zone.ZoneID).ToList();

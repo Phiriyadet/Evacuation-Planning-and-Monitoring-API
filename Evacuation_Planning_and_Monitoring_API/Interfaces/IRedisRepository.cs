@@ -5,5 +5,8 @@
         Task SetEvacuationStatusCache(string zoneId, string status);
         Task<string?> GetEvacuationStatusCache(string zoneId);
         Task ClearEvacuationStatusCache(string zoneId);
+        Task SetEvacuationPlansCache(string plansJson);
+        Task<string?> GetEvacuationPlansCache();
+        Task ClearEvacuationPlansCache();
     }
 }
