@@ -26,7 +26,7 @@ namespace Evacuation_Planning_and_Monitoring_API.Controllers
                 var result = await _evacuationRepository.EvacationPlanAsync(distanceKM);
                 if (result == null || !result.Any())
                 {
-                    return NotFound("No evacuation plans found for the specified distance.");
+                    return NotFound("No evacuation plans found for the specified distance or no vehicle available.");
                 }
                 return Ok(result);
             }
