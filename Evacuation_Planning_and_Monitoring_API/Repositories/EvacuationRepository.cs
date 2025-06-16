@@ -37,7 +37,7 @@ namespace Evacuation_Planning_and_Monitoring_API.Repositories
                 var zones = await _zoneRepository.GetAllEvacuationZonesAsync();
                 var vehicles = await _vehicleRepository.GetAllVehiclesAsync();
                 var sortedZones = zones.OrderByDescending(z => z.UrgencyLevel).ThenByDescending(z => z.NumberOfPeople).ToList(); //เรียงลำดับโซนตามระดับความเร่งด่วนมากไปน้อย  
-                var evacuationPlans = new List<EvacuationPlan>();
+                var evacuationPlanList = new List<EvacuationPlan>();
                 var vehiclesList = new List<Vehicle>(vehicles);
 
                 await _cache.ClearEvacuationPlansCache(); // ลบแคชสำหรับแผนการอพยพก่อนเริ่มใหม่
@@ -79,14 +79,14 @@ namespace Evacuation_Planning_and_Monitoring_API.Repositories
 
                         }
 
-                        evacuationPlans.Add(evacuationPlan); //เพิ่มแผนการอพยพลงในรายการแผนการอพยพ
+                        evacuationPlanList.Add(evacuationPlan); //เพิ่มแผนการอพยพลงในรายการแผนการอพยพ
                     }
                 }
 
-                await _cache.SetEvacuationPlansCache(JsonSerializer.Serialize(evacuationPlans)); // เก็บแผนการอพยพลงในแคช
-                await _context.EvacuationPlans.AddRangeAsync(evacuationPlans);
+                await _cache.SetEvacuationPlansCache(JsonSerializer.Serialize(evacuationPlanList)); // เก็บแผนการอพยพลงในแคช
+                await _context.EvacuationPlans.AddRangeAsync(evacuationPlanList);
                 await _context.SaveChangesAsync(); // บันทึกแผนการอพยพลงฐานข้อมูล
-                return evacuationPlans; // ส่งคืนแผนการอพยพที่ถูกสร้างขึ้น
+                return evacuationPlanList; // ส่งคืนแผนการอพยพที่ถูกสร้างขึ้น
             }
             finally
             {
@@ -255,17 +255,17 @@ namespace Evacuation_Planning_and_Monitoring_API.Repositories
             try
             {
 
-                var evacuationPlans = new List<EvacuationPlan>();
+                var evacuationPlanList = new List<EvacuationPlan>();
                 var evacuationPlansJson = await _cache.GetEvacuationPlansCache();
                 if (string.IsNullOrEmpty(evacuationPlansJson))
                 {
                     _logger.LogInformation("No evacuation plans found in cache. Fetching from database...");
-                    evacuationPlans = await _context.EvacuationPlans.ToListAsync();
+                    evacuationPlanList = await _context.EvacuationPlans.ToListAsync();
                 }
                 else
                 {
-                    evacuationPlans = JsonSerializer.Deserialize<List<EvacuationPlan>>(evacuationPlansJson) ?? new List<EvacuationPlan>();
-                    _logger.LogInformation($"Retrieved {evacuationPlans.Count} evacuation plans from cache.");
+                    evacuationPlanList = JsonSerializer.Deserialize<List<EvacuationPlan>>(evacuationPlansJson) ?? new List<EvacuationPlan>();
+                    _logger.LogInformation($"Retrieved {evacuationPlanList.Count} evacuation plans from cache.");
 
                 }
 
@@ -278,7 +278,7 @@ namespace Evacuation_Planning_and_Monitoring_API.Repositories
 
                 foreach (var zone in zones)
                 {
-                    var zonePlans = evacuationPlans.Where(ep => ep.ZoneID == zone.ZoneID).ToList();
+                    var zonePlans = evacuationPlanList.Where(ep => ep.ZoneID == zone.ZoneID).ToList();
                     if (zonePlans.Any())
                     {
                         _logger.LogInformation($"Updating evacuation status for zone {zone.ZoneID} with {zonePlans.Count} plans.");
@@ -300,6 +300,19 @@ namespace Evacuation_Planning_and_Monitoring_API.Repositories
                         var status = JsonSerializer.Serialize(evacuationStatus);
 
                         await _cache.SetEvacuationStatusCache(zone.ZoneID, status); // เก็บสถานะการอพยพลงในแคช
+                        var existingStatuses = await _context.EvacuationStatuses.Where(es => es.ZoneID == zone.ZoneID).FirstOrDefaultAsync();
+                        if (existingStatuses != null) {
+                            existingStatuses.TotalEvacuated = evacuationStatus.TotalEvacuated;
+                            existingStatuses.RemainingPeople = evacuationStatus.RemainingPeople;
+                            existingStatuses.LastVehicleIDUsed = evacuationStatus.LastVehicleIDUsed;
+
+                            _logger.LogInformation($"Updated existing evacuation status for zone {zone.ZoneID}.");
+                        }
+                        else
+                        {
+                            await _context.EvacuationStatuses.AddAsync(evacuationStatus);
+                            _logger.LogInformation($"Created new evacuation status for zone {zone.ZoneID}.");
+                        }
 
                         evacuationStatusList.Add(evacuationStatus);
 
@@ -307,12 +320,10 @@ namespace Evacuation_Planning_and_Monitoring_API.Repositories
                     else
                     {
                         _logger.LogWarning($"No evacuation plans found for zone {zone.ZoneID}. Skipping status update.");
+
                     }
 
                 }
-                await _context.EvacuationStatuses.ExecuteDeleteAsync(); // ลบสถานะการอพยพทั้งหมดก่อนที่จะเพิ่มใหม่
-                await _context.SaveChangesAsync(); // บันทึกการลบสถานะการอพยพลงฐานข้อมูล
-                await _context.EvacuationStatuses.AddRangeAsync(evacuationStatusList);
                 await _context.SaveChangesAsync(); // บันทึกสถานะการอพยพลงฐานข้อมูล
                 return evacuationStatusList; // ส่งคืนสถานะการอพยพที่ถูกสร้างขึ้น
             }
