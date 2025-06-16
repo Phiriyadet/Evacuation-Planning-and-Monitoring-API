@@ -295,8 +295,9 @@ namespace Evacuation_Planning_and_Monitoring_API.Repositories
                         };
 
                         var status = JsonSerializer.Serialize(evacuationStatus);
-
                         await _cache.SetEvacuationStatusCache(zone.ZoneID, status); // เก็บสถานะการอพยพลงในแคช
+                        _logger.LogInformation($"Cached evacuation status for zone {zone.ZoneID}.");
+
                         var existingStatuses = await _context.EvacuationStatuses.Where(es => es.ZoneID == zone.ZoneID).FirstOrDefaultAsync();
                         if (existingStatuses != null) {
                             existingStatuses.TotalEvacuated = evacuationStatus.TotalEvacuated;
