@@ -111,14 +111,15 @@ namespace Evacuation_Planning_and_Monitoring_API.Repositories
             {
                 var evaPlans = await _context.EvacuationPlans.ToListAsync();
                 var totalEvacuated = evaPlans.Where(ep => ep.ZoneID == zone.ZoneID).Sum(ep => ep.NumberOfPeople);
+                remainingPeople = zone.NumberOfPeople - totalEvacuated; //ใช้จำนวนคนที่เหลืออยู่ในโซน
                 if (totalEvacuated > 0)
                 {
-                    remainingPeople = zone.NumberOfPeople - totalEvacuated; //ใช้จำนวนคนที่เหลืออยู่ในโซน
+                    
                     _logger.LogInformation($"No cached status found for zone {zone.ZoneID}. Total evacuated in plan: {totalEvacuated}, Remaining people: {remainingPeople}");
                 }
                 else
                 {
-                    remainingPeople = zone.NumberOfPeople - totalEvacuated; //ใช้จำนวนคนที่เหลืออยู่ในโซน
+                    
                     _logger.LogInformation($"No cached status found for zone {zone.ZoneID}. Using initial number of people: {remainingPeople}");
                 }
             }
