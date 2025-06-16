@@ -270,10 +270,7 @@ namespace Evacuation_Planning_and_Monitoring_API.Repositories
                 }
 
                 var zones = await _zoneRepository.GetAllEvacuationZonesAsync();
-                var vehicles = await _vehicleRepository.GetAllVehiclesAsync();
-
-
-
+                
                 var evacuationStatusList = new List<EvacuationStatus>();
 
                 foreach (var zone in zones)
