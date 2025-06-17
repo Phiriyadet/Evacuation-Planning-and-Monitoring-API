@@ -39,6 +39,11 @@ namespace Evacuation_Planning_and_Monitoring_API.Repositories
 
         }
 
+        public async Task<IEnumerable<string>> GetAllZoneIDAsync()
+        {
+            return await _context.EvacuationZones.Select(e => e.ZoneID).ToListAsync();
+        }
+
         public async Task<EvacuationZone?> GetEvacuationZoneByIdAsync(string id)
         {
             return await _context.EvacuationZones.FirstOrDefaultAsync(e => e.ZoneID.ToUpper() == id.ToUpper());

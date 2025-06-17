@@ -8,6 +8,7 @@ namespace Evacuation_Planning_and_Monitoring_API.Interfaces
         Task<IEnumerable<Vehicle>> GetAllVehiclesAsync();
         Task<Vehicle> AddVehicleAsync(Vehicle vehicle);
         Task<Vehicle?> UpdateVehicleAsync(Vehicle vehicle);
+        Task<int> UpdateIsAvailableToTrue();
         Task<Vehicle?> DeleteVehicleAsync(string id);
     }
 }

@@ -183,7 +183,7 @@ namespace Evacuation_Planning_and_Monitoring_API.Repositories
             try
             {
 
-                var zoneIDs = await _context.EvacuationZones.Select(e => e.ZoneID).ToListAsync();
+                var zoneIDs = await _zoneRepository.GetAllZoneIDAsync(); // ดึงรายการ ZoneID ทั้งหมดจากฐานข้อมูล
                 var vehiles = await _vehicleRepository.GetAllVehiclesAsync();
 
                 foreach (var zoneID in zoneIDs)
@@ -191,19 +191,22 @@ namespace Evacuation_Planning_and_Monitoring_API.Repositories
                     await _cache.ClearEvacuationStatusCache(zoneID); // ลบแคชสำหรับโซนนี้
                     _logger.LogInformation($"Removed cache for zone {zoneID}.");
                 }
-                foreach (var vehicle in vehiles)
-                {
-                    vehicle.IsAvailable = true; // ทำเครื่องหมายว่ารถทุกคันกลับมาใช้งานได้อีกครั้ง
-                    await _vehicleRepository.UpdateVehicleAsync(vehicle); // อัพเดทรถในฐานข้อมูล
-                    _logger.LogInformation($"Vehicle {vehicle.VehicleID} is now available again.");
-                }
-
                 await _cache.ClearEvacuationPlansCache(); // ลบแคชสำหรับแผนการอพยพทั้งหมด
+                _logger.LogInformation("Cleared evacuation plans cache.");
 
                 var deleteP = await _context.EvacuationPlans.ExecuteDeleteAsync(); // Clear all evacuation plans from the database
                 var deleteS = await _context.EvacuationStatuses.ExecuteDeleteAsync(); // Clear all evacuation statuses from the database
-                await _context.SaveChangesAsync();
+                //await _context.SaveChangesAsync();
                 _logger.LogInformation($"Cleared evacuation plans and statuses. Deleted {deleteP} plans and {deleteS} statuses from the database.");
+                //foreach (var vehicle in vehiles)
+                //{
+                //    vehicle.IsAvailable = true; // ทำเครื่องหมายว่ารถทุกคันกลับมาใช้งานได้อีกครั้ง
+                //    await _vehicleRepository.UpdateVehicleAsync(vehicle); // อัพเดทรถในฐานข้อมูล
+                //    _logger.LogInformation($"Vehicle {vehicle.VehicleID} is now available again.");
+                //}
+                var vehicleUpdateCount = await _vehicleRepository.UpdateIsAvailableToTrue(); // ทำเครื่องหมายว่ารถทุกคันกลับมาใช้งานได้อีกครั้ง
+                _logger.LogInformation($"Marked all vehicles as available again.");
+
             }
             finally
             {
@@ -213,35 +216,36 @@ namespace Evacuation_Planning_and_Monitoring_API.Repositories
 
         public async Task<IEnumerable<EvacuationStatus>> EvacuationStatusAsync()
         {
-            var zones = await _zoneRepository.GetAllEvacuationZonesAsync();
+           
+            var zoneIDs = await _zoneRepository.GetAllZoneIDAsync(); // ดึงรายการ ZoneID ทั้งหมดจากฐานข้อมูล
             var evacuationStatusList = new List<EvacuationStatus>();
-            foreach (var zone in zones)
+            foreach (var zoneID in zoneIDs)
             {
 
-                var cachedStatusJson = await _cache.GetEvacuationStatusCache(zone.ZoneID);
+                var cachedStatusJson = await _cache.GetEvacuationStatusCache(zoneID);
                 if (!string.IsNullOrEmpty(cachedStatusJson))
                 {
                     var status = JsonSerializer.Deserialize<EvacuationStatus>(cachedStatusJson);
                     if (status != null)
                     {
                         evacuationStatusList.Add(status);
-                        _logger.LogInformation($"Retrieved cached evacuation status for zone {zone.ZoneID}.");
+                        _logger.LogInformation($"Retrieved cached evacuation status for zone {zoneID}.");
                     }
                 }
                 else
                 {
-                    var evaStatus = await _context.EvacuationStatuses.FindAsync(zone.ZoneID);
+                    var evaStatus = await _context.EvacuationStatuses.FindAsync(zoneID);
                     if (evaStatus != null)
                     {
                         var statusJson = JsonSerializer.Serialize(evaStatus);
 
-                        await _cache.SetEvacuationStatusCache(zone.ZoneID, statusJson); // เก็บสถานะการอพยพลงในแคช
+                        await _cache.SetEvacuationStatusCache(zoneID, statusJson); // เก็บสถานะการอพยพลงในแคช
                         evacuationStatusList.Add(evaStatus);
-                        _logger.LogInformation($"No cached status found for zone {zone.ZoneID}. Fetched from database and cached it.");
+                        _logger.LogInformation($"No cached status found for zone {zoneID}. Fetched from database and cached it.");
                     }
                     else
                     {
-                        _logger.LogWarning($"No evacuation status found for zone {zone.ZoneID} in the database.");
+                        _logger.LogWarning($"No evacuation status found for zone {zoneID} in the database.");
                     }
                 }
             }

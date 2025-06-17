@@ -42,6 +42,12 @@ namespace Evacuation_Planning_and_Monitoring_API.Repositories
             return await _context.Vehicles.FirstOrDefaultAsync(v => v.VehicleID.ToUpper() == id.ToUpper());
         }
 
+        public async Task<int> UpdateIsAvailableToTrue()
+        {
+            return await _context.Vehicles.Where(v => v.IsAvailable == false)
+                    .ExecuteUpdateAsync(v => v.SetProperty(x => x.IsAvailable, true));
+        }
+
         public async Task<Vehicle?> UpdateVehicleAsync(Vehicle vehicle)
         {
             var existingVehicle = await _context.Vehicles.FirstOrDefaultAsync(v => v.VehicleID.ToUpper() == vehicle.VehicleID.ToUpper());
