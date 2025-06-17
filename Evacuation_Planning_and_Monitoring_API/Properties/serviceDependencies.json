@@ -5,11 +5,6 @@
       "connectionId": "ConnectionStrings:DatabaseConnection",
       "dynamicId": null
     },
-    "secrets1": {
-      "type": "secrets",
-      "connectionId": "VaultUri",
-      "dynamicId": null
-    },
     "redis1": {
       "type": "redis",
       "connectionId": "CacheRedisConnection",
