@@ -184,7 +184,7 @@ namespace Evacuation_Planning_and_Monitoring_API.Repositories
             {
 
                 var zoneIDs = await _zoneRepository.GetAllZoneIDAsync(); // ดึงรายการ ZoneID ทั้งหมดจากฐานข้อมูล
-                var vehiles = await _vehicleRepository.GetAllVehiclesAsync();
+                //var vehiles = await _vehicleRepository.GetAllVehiclesAsync();
 
                 foreach (var zoneID in zoneIDs)
                 {
