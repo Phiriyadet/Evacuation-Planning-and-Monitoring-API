@@ -87,6 +87,8 @@ namespace Evacuation_Planning_and_Monitoring_API.Repositories
                     await _cache.SetEvacuationPlansCache(JsonSerializer.Serialize(evacuationPlanList)); // เก็บแผนการอพยพลงในแคช
                     await _context.EvacuationPlans.AddRangeAsync(evacuationPlanList);
                     await _context.SaveChangesAsync(); // บันทึกแผนการอพยพลงฐานข้อมูล
+                    
+                    _logger.LogInformation($"Evacuation plans created for {evacuationPlanList.Count} zones.");
                 }
                 
                 return evacuationPlanList; // ส่งคืนแผนการอพยพที่ถูกสร้างขึ้น
