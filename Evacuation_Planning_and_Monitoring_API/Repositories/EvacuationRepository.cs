@@ -40,7 +40,7 @@ namespace Evacuation_Planning_and_Monitoring_API.Repositories
                 var evacuationPlanList = new List<EvacuationPlan>();
                 var vehiclesList = new List<Vehicle>(vehicles);
 
-                await _cache.ClearEvacuationPlansCache(); // ลบแคชสำหรับแผนการอพยพก่อนเริ่มใหม่
+                //await _cache.ClearEvacuationPlansCache(); // ลบแคชสำหรับแผนการอพยพก่อนเริ่มใหม่
 
                 //ส่งรถไปยังโซนที่มีความเร่งด่วนสูงสุดก่อน และใช้รถที่มีความจุน้อยที่สุดก่อน  
                 foreach (var zone in sortedZones)
@@ -82,10 +82,13 @@ namespace Evacuation_Planning_and_Monitoring_API.Repositories
                         evacuationPlanList.Add(evacuationPlan); //เพิ่มแผนการอพยพลงในรายการแผนการอพยพ
                     }
                 }
-
-                await _cache.SetEvacuationPlansCache(JsonSerializer.Serialize(evacuationPlanList)); // เก็บแผนการอพยพลงในแคช
-                await _context.EvacuationPlans.AddRangeAsync(evacuationPlanList);
-                await _context.SaveChangesAsync(); // บันทึกแผนการอพยพลงฐานข้อมูล
+                if (evacuationPlanList.Count > 0)
+                {
+                    await _cache.SetEvacuationPlansCache(JsonSerializer.Serialize(evacuationPlanList)); // เก็บแผนการอพยพลงในแคช
+                    await _context.EvacuationPlans.AddRangeAsync(evacuationPlanList);
+                    await _context.SaveChangesAsync(); // บันทึกแผนการอพยพลงฐานข้อมูล
+                }
+                
                 return evacuationPlanList; // ส่งคืนแผนการอพยพที่ถูกสร้างขึ้น
             }
             finally
