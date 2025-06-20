@@ -70,8 +70,8 @@ namespace Evacuation_Planning_and_Monitoring_API.Repositories
                         int canTake = Math.Min(vSuit.Capacity, remainingPeople); // จำนวนคนที่รถสามารถรับได้  
                         var evacuationPlan = CreateEvacuationPlan(zone, vSuit, canTake); // สร้างแผนการอพยพสำหรับโซนนี้และรถที่เลือก
 
-                        var planJson = JsonSerializer.Serialize(evacuationPlan);
-                        await _cache.SetEvacuationPlansCache(vSuit.VehicleID, planJson); // เก็บแผนการอพยพลงในแคช
+                        //var planJson = JsonSerializer.Serialize(evacuationPlan);
+                        //await _cache.SetEvacuationPlansCache(vSuit.VehicleID, planJson); // เก็บแผนการอพยพลงในแคช
                         await _context.EvacuationPlans.AddAsync(evacuationPlan);
                         await _context.SaveChangesAsync(); // บันทึกแผนการอพยพลงฐานข้อมูล
 
@@ -189,17 +189,17 @@ namespace Evacuation_Planning_and_Monitoring_API.Repositories
 
                 var zoneIDs = await _zoneRepository.GetAllZoneIDAsync(); // ดึงรายการ ZoneID ทั้งหมดจากฐานข้อมูล
                 //var vehiles = await _vehicleRepository.GetAllVehiclesAsync();
-                var vehicleIDs = await _vehicleRepository.GetAllVehicleIDAsync();// ดึงรายการรถทั้งหมดจากฐานข้อมูล
+                //var vehicleIDs = await _vehicleRepository.GetAllVehicleIDAsync();// ดึงรายการรถทั้งหมดจากฐานข้อมูล
                 foreach (var zoneID in zoneIDs)
                 {
                     await _cache.ClearEvacuationStatusCache(zoneID); // ลบแคชสำหรับโซนนี้
                     _logger.LogInformation($"Removed cache for zone {zoneID}.");
                 }
-                foreach (var vehicleID in vehicleIDs)
-                {
-                    await _cache.ClearEvacuationPlansCache(vehicleID); // ลบแคชสำหรับแผนการอพยพของรถนี้
-                    _logger.LogInformation($"Removed cache for evacuation plans of vehicle {vehicleID}.");
-                }
+                //foreach (var vehicleID in vehicleIDs)
+                //{
+                //    await _cache.ClearEvacuationPlansCache(vehicleID); // ลบแคชสำหรับแผนการอพยพของรถนี้
+                //    _logger.LogInformation($"Removed cache for evacuation plans of vehicle {vehicleID}.");
+                //}
 
                 var deleteP = await _context.EvacuationPlans.ExecuteDeleteAsync(); // Clear all evacuation plans from the database
                 var deleteS = await _context.EvacuationStatuses.ExecuteDeleteAsync(); // Clear all evacuation statuses from the database
@@ -267,33 +267,8 @@ namespace Evacuation_Planning_and_Monitoring_API.Repositories
             {
                 var vehicleIDs = await _vehicleRepository.GetAllVehicleIDAsync(); // ดึงรายการรถทั้งหมดจากฐานข้อมูล
 
-                var evacuationPlanList = new List<EvacuationPlan>();
-                foreach ( var vehicleID in vehicleIDs ) {
-                    var planJson = await _cache.GetEvacuationPlansCache(vehicleID);
-                    if(!string.IsNullOrEmpty(planJson))
-                    {
-                        var plan = JsonSerializer.Deserialize<EvacuationPlan>(planJson);
-                        if (plan != null)
-                        {
-                            evacuationPlanList.Add(plan);
-                            _logger.LogInformation($"Retrieved cached evacuation plan for vehicle {vehicleID}.");
-                        }
-                        else
-                        {
-                            var plans = await _context.EvacuationPlans.Where(ep => ep.VehicleID == vehicleID).ToListAsync();
-                            evacuationPlanList.AddRange(plans);
-                            _logger.LogInformation($"Cached plan for vehicle {vehicleID} is invalid. Fetched from database.");
-                        }
-                    }
-                    else
-                    {
-                        var plans = await _context.EvacuationPlans.Where(ep => ep.VehicleID == vehicleID).ToListAsync();
-                        evacuationPlanList.AddRange(plans);
-                        _logger.LogInformation($"No cached plans found for vehicle {vehicleID}. Fetched from database.");
-                    }
+                var evacuationPlanList = await _context.EvacuationPlans.ToListAsync(); // ดึงแผนการอพยพทั้งหมดจากฐานข้อมูล
 
-
-                }
 
                 var zones = await _zoneRepository.GetAllEvacuationZonesAsync();
                 
