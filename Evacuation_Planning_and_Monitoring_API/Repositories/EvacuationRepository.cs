@@ -40,8 +40,6 @@ namespace Evacuation_Planning_and_Monitoring_API.Repositories
                 var evacuationPlanList = new List<EvacuationPlan>();
                 var vehiclesList = new List<Vehicle>(vehicles);
 
-                //await _cache.ClearEvacuationPlansCache(); // ลบแคชสำหรับแผนการอพยพก่อนเริ่มใหม่
-
                 //ส่งรถไปยังโซนที่มีความเร่งด่วนสูงสุดก่อน และใช้รถที่มีความจุน้อยที่สุดก่อน  
                 foreach (var zone in sortedZones)
                 {
@@ -86,7 +84,6 @@ namespace Evacuation_Planning_and_Monitoring_API.Repositories
 
                         }
 
-                        
                     }
                 }
               
@@ -195,22 +192,13 @@ namespace Evacuation_Planning_and_Monitoring_API.Repositories
                     await _cache.ClearEvacuationStatusCache(zoneID); // ลบแคชสำหรับโซนนี้
                     _logger.LogInformation($"Removed cache for zone {zoneID}.");
                 }
-                //foreach (var vehicleID in vehicleIDs)
-                //{
-                //    await _cache.ClearEvacuationPlansCache(vehicleID); // ลบแคชสำหรับแผนการอพยพของรถนี้
-                //    _logger.LogInformation($"Removed cache for evacuation plans of vehicle {vehicleID}.");
-                //}
+            
 
                 var deleteP = await _context.EvacuationPlans.ExecuteDeleteAsync(); // Clear all evacuation plans from the database
                 var deleteS = await _context.EvacuationStatuses.ExecuteDeleteAsync(); // Clear all evacuation statuses from the database
                 //await _context.SaveChangesAsync();
                 _logger.LogInformation($"Cleared evacuation plans and statuses. Deleted {deleteP} plans and {deleteS} statuses from the database.");
-                //foreach (var vehicle in vehiles)
-                //{
-                //    vehicle.IsAvailable = true; // ทำเครื่องหมายว่ารถทุกคันกลับมาใช้งานได้อีกครั้ง
-                //    await _vehicleRepository.UpdateVehicleAsync(vehicle); // อัพเดทรถในฐานข้อมูล
-                //    _logger.LogInformation($"Vehicle {vehicle.VehicleID} is now available again.");
-                //}
+               
                 var vehicleUpdateCount = await _vehicleRepository.UpdateIsAvailableToTrue(); // ทำเครื่องหมายว่ารถทุกคันกลับมาใช้งานได้อีกครั้ง
                 _logger.LogInformation($"Marked all vehicles as available again.");
 
@@ -265,10 +253,8 @@ namespace Evacuation_Planning_and_Monitoring_API.Repositories
             await _semaphore.WaitAsync(); // รอจนกว่าจะสามารถเข้าถึงได้
             try
             {
-                var vehicleIDs = await _vehicleRepository.GetAllVehicleIDAsync(); // ดึงรายการรถทั้งหมดจากฐานข้อมูล
-
+              
                 var evacuationPlanList = await _context.EvacuationPlans.ToListAsync(); // ดึงแผนการอพยพทั้งหมดจากฐานข้อมูล
-
 
                 var zones = await _zoneRepository.GetAllEvacuationZonesAsync();
                 
