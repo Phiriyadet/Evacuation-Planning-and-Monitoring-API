@@ -7,43 +7,41 @@ namespace Evacuation_Planning_and_Monitoring_API.Repositories
     public class RedisRepository : IRedisRepository
     {
         private IDistributedCache _cache;
-        private const string cacheKey = "Evacuation:Status:"; 
-        private const string plansCacheKey = "Evacuation:Plans";
+        private const string statusCacheKey = "Evacuation:Status:"; 
+        private const string planCacheKey = "Evacuation:Plan:";
         public RedisRepository(IDistributedCache cache)
         {
             _cache = cache;
         }
 
         // Implement the methods from IRedisRepository here
-        public async Task SetEvacuationStatusCache(string zoneId, string status)
+        public async Task SetEvacuationStatusCache(string zoneId, string statusJson)
         {
-            string zoneCacheKey = $"{cacheKey}{zoneId}";
-            await _cache.SetStringAsync(zoneCacheKey, status);
+            await _cache.SetStringAsync($"{statusCacheKey}{zoneId}", statusJson);
         }
         public async Task<string?> GetEvacuationStatusCache(string zoneId)
         {
-            return await _cache.GetStringAsync($"{cacheKey}{zoneId}");
+            return await _cache.GetStringAsync($"{statusCacheKey}{zoneId}");
             
         }
         public async Task ClearEvacuationStatusCache(string zoneId)
         {
-           await _cache.RemoveAsync($"{cacheKey}{zoneId}");
+           await _cache.RemoveAsync($"{statusCacheKey}{zoneId}");
         }
 
-        public async Task SetEvacuationPlansCache(string plansJson)
+        public async Task SetEvacuationPlansCache(string vehicleId, string plansJson)
         {
-            await _cache.SetStringAsync(plansCacheKey, plansJson);
+            await _cache.SetStringAsync($"{planCacheKey}{vehicleId}", plansJson);
         }
 
-        public async Task<string?> GetEvacuationPlansCache()
+        public async Task<string?> GetEvacuationPlansCache(string vehicleId)
         {
-            return await _cache.GetStringAsync(plansCacheKey);
-
+            return await _cache.GetStringAsync($"{planCacheKey}{vehicleId}");
         }
 
-        public async Task ClearEvacuationPlansCache()
+        public async Task ClearEvacuationPlansCache(string vehicleId)
         {
-            await _cache.RemoveAsync(plansCacheKey);
+            await _cache.RemoveAsync($"{planCacheKey}{vehicleId}");
         }
     }
     

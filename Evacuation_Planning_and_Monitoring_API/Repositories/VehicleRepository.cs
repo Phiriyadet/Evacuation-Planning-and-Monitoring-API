@@ -32,6 +32,11 @@ namespace Evacuation_Planning_and_Monitoring_API.Repositories
             return null;
         }
 
+        public async Task<IEnumerable<string>> GetAllVehicleIDAsync()
+        {
+            return await _context.Vehicles.Select(v => v.VehicleID).ToListAsync();
+        }
+
         public async Task<IEnumerable<Vehicle>> GetAllVehiclesAsync()
         {
             return await _context.Vehicles.ToListAsync();
