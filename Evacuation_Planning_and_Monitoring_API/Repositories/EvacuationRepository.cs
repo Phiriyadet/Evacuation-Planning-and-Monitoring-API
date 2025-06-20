@@ -280,7 +280,9 @@ namespace Evacuation_Planning_and_Monitoring_API.Repositories
                         }
                         else
                         {
-                            _logger.LogWarning($"Failed to deserialize evacuation plan for vehicle {vehicleID} from cache.");
+                            var plans = await _context.EvacuationPlans.Where(ep => ep.VehicleID == vehicleID).ToListAsync();
+                            evacuationPlanList.AddRange(plans);
+                            _logger.LogInformation($"Cached plan for vehicle {vehicleID} is invalid. Fetched from database.");
                         }
                     }
                     else
