@@ -15,7 +15,7 @@ namespace Evacuation_Planning_and_Monitoring_API.Repositories
         public async Task<Vehicle> AddVehicleAsync(Vehicle vehicle)
         {
             vehicle.VehicleID = vehicle.VehicleID.ToUpper(); // Ensure VehicleID is in uppercase
-            _context.Vehicles.Add(vehicle);
+            await _context.Vehicles.AddAsync(vehicle);
             await _context.SaveChangesAsync();
             return vehicle;
         }

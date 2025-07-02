@@ -15,7 +15,7 @@ namespace Evacuation_Planning_and_Monitoring_API.Repositories
         public async Task<EvacuationZone> AddEvacuationZoneAsync(EvacuationZone zone)
         {
             zone.ZoneID = zone.ZoneID.ToUpper(); // Ensure ZoneID is in uppercase
-            _context.EvacuationZones.Add(zone);
+            await _context.EvacuationZones.AddAsync(zone);
             await _context.SaveChangesAsync();
             return zone;
         }
